@@ -22,8 +22,13 @@ class n8nconnect extends eqLogic {
     public static function callN8n($method, $endpoint, $data = null) {
         $base = trim(config::byKey('n8n_url', 'n8nconnect'), '/');
         $key = config::byKey('n8n_api_key', 'n8nconnect');
+        $user = config::byKey('n8n_user', 'n8nconnect');
+        $pass = config::byKey('n8n_pass', 'n8nconnect');
         if ($base == '' || $key == '') {
             throw new Exception(__('Configuration n8n incomplète', __FILE__));
+        }
+        if (substr($base, -7) === '/api/v1') {
+            $base = substr($base, 0, -7);
         }
         $url = $base . '/api/v1' . $endpoint;
         $curl = curl_init();
@@ -36,6 +41,9 @@ class n8nconnect extends eqLogic {
             'X-N8N-API-KEY: ' . $key,
         ];
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        if ($user != '' || $pass != '') {
+            curl_setopt($curl, CURLOPT_USERPWD, $user . ':' . $pass);
+        }
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($curl, CURLOPT_TIMEOUT, 15);
         if ($data !== null) {

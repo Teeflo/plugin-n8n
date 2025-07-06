@@ -42,6 +42,24 @@ if (!isConnect()) {
       <div class="col-md-2">
         <a class="btn btn-default" id="bt_testN8N"><i class="fas fa-check"></i> {{Tester}}</a>
       </div>
+    <div class="form-group">
+      <label class="col-md-4 control-label">{{Identifiant Basic Auth}}
+        <sup><i class="fas fa-question-circle tooltips" title="{{Laisser vide si votre instance n8n n'est pas protégée par Basic Auth}}"></i></sup>
+      </label>
+      <div class="col-md-4">
+        <input class="configKey form-control" data-l1key="n8n_user" placeholder="{{Utilisateur}}"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-md-4 control-label">{{Mot de passe Basic Auth}}
+        <sup><i class="fas fa-question-circle tooltips" title="{{Laisser vide si votre instance n8n n'est pas protégée par Basic Auth}}"></i></sup>
+      </label>
+      <div class="col-md-4">
+        <input class="configKey form-control" data-l1key="n8n_pass" type="password"/>
+      </div>
+      <div class="col-md-2">
+        <a class="btn btn-default" id="bt_testN8N"><i class="fas fa-check"></i> {{Tester}}</a>
+      </div>
     </div>
   </fieldset>
 </form>
@@ -49,6 +67,8 @@ if (!isConnect()) {
 $('#bt_testN8N').on('click', function(){
   var url = $('.configKey[data-l1key=n8n_url]').val();
   var key = $('.configKey[data-l1key=n8n_api_key]').val();
+  var user = $('.configKey[data-l1key=n8n_user]').val();
+  var pass = $('.configKey[data-l1key=n8n_pass]').val();
   jeedomUtils.hideAlert();
   $.ajax({
     type: 'POST',
@@ -56,7 +76,9 @@ $('#bt_testN8N').on('click', function(){
     data: {
       action: 'test',
       url: url,
-      key: key
+      key: key,
+      user: user,
+      pass: pass
     },
     dataType: 'json',
     error: function (request, status, error) {

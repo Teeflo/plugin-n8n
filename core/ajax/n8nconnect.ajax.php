@@ -14,6 +14,8 @@ try {
     if (init('action') == 'test') {
         $url = rtrim(init('url'), '/');
         $key = init('key');
+        $user = init('user');
+        $pass = init('pass');
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url . '/api/v1/workflows?limit=1');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -23,6 +25,9 @@ try {
             'Accept: application/json',
             'X-N8N-API-KEY: ' . $key,
         ]);
+        if ($user != '' || $pass != '') {
+            curl_setopt($curl, CURLOPT_USERPWD, $user . ':' . $pass);
+        }
         $resp = curl_exec($curl);
         if ($resp === false) {
             throw new Exception(curl_error($curl));
