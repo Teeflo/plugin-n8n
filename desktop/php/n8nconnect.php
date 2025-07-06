@@ -28,7 +28,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 		<legend><i class="fas fa-table"></i> {{Mes workflows}}</legend>
 		<?php
 		if (count($eqLogics) == 0) {
-			echo '<br><div class="text-center" style="font-size:1.2em;font-weight:bold;">{{Aucun équipement Template trouvé, cliquer sur "Ajouter" pour commencer}}</div>';
+			echo '<br><div class="text-center" style="font-size:1.2em;font-weight:bold;">{{Aucun équipement n8n trouvé, cliquer sur "Ajouter" pour commencer}}</div>';
 		} else {
 			// Champ de recherche
 			echo '<div class="input-group" style="margin:5px;">';
@@ -128,11 +128,15 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
 							<legend><i class="fas fa-cogs"></i> {{Paramètres spécifiques}}</legend>
                                                         <div class="form-group">
-                                                                <label class="col-sm-4 control-label">{{ID du workflow}}
-                                                                        <sup><i class="fas fa-question-circle tooltips" title="{{Identifiant du workflow dans n8n}}"></i></sup>
+                                                                <label class="col-sm-4 control-label">{{Workflow}}
+                                                                        <sup><i class="fas fa-question-circle tooltips" title="{{Sélection du workflow n8n}}"></i></sup>
                                                                 </label>
                                                                 <div class="col-sm-6">
-                                                                        <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="workflow_id" placeholder="123">
+                                                                        <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="workflow_id" id="sel_workflow"></select>
+                                                                        <input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="workflow_id" id="in_workflow_id" placeholder="{{ID du workflow}}" style="display:none;margin-top:5px;"/>
+                                                                </div>
+                                                                <div class="col-sm-2">
+                                                                        <a class="btn btn-default" id="bt_refreshWorkflow"><i class="fas fa-sync"></i></a>
                                                                 </div>
                                                         </div>
 							<!-- Exemple de champ de saisie du cron d'auto-actualisation avec assistant -->

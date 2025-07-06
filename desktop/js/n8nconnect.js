@@ -164,7 +164,10 @@ $('#bt_refreshWorkflow').on('click', function () {
 })
 
 $(document).ready(function () {
+<<<<<<< HEAD
   // Initialisation des workflows si on est sur la page d'équipement
+=======
+>>>>>>> 1cd65712c46d71c9feb689aa53868dd163eb5fe7
   if ($('#bt_refreshWorkflow').length) {
     showManualWorkflowInput()
     loadWorkflows()
@@ -190,10 +193,13 @@ $(document).ready(function () {
         $('.eqLogicThumbnailDisplay').hide();
         $('.eqLogic').show();
         loadCmd();
+<<<<<<< HEAD
         // Recharger les workflows quand on crée un nouvel équipement
         if ($('#bt_refreshWorkflow').length) {
           loadWorkflows();
         }
+=======
+>>>>>>> 1cd65712c46d71c9feb689aa53868dd163eb5fe7
       }
     });
   });
@@ -225,10 +231,16 @@ $(document).ready(function () {
           return;
         }
         $('#div_alert').showAlert({message: '{{Équipement sauvegardé}}', level: 'success'});
+<<<<<<< HEAD
         // Ne pas recharger la page, juste mettre à jour l'ID si c'est un nouvel équipement
         if (!eqLogic.id && data.result && data.result.id) {
           $('.eqLogicAttr[data-l1key=id]').val(data.result.id);
         }
+=======
+        $('.eqLogic').hide();
+        $('.eqLogicThumbnailDisplay').show();
+        location.reload();
+>>>>>>> 1cd65712c46d71c9feb689aa53868dd163eb5fe7
       }
     });
   });
@@ -245,8 +257,12 @@ $(document).ready(function () {
         },
         dataType: 'json',
         error: function (request, status, error) {
+<<<<<<< HEAD
           console.error('Erreur AJAX:', request.responseText);
           $('#div_alert').showAlert({message: '{{Erreur lors de la suppression}}', level: 'danger'});
+=======
+          handleAjaxError(request, status, error);
+>>>>>>> 1cd65712c46d71c9feb689aa53868dd163eb5fe7
         },
         success: function (data) {
           if (data.state != 'ok') {
@@ -255,7 +271,11 @@ $(document).ready(function () {
           }
           $('.eqLogic').hide();
           $('.eqLogicThumbnailDisplay').show();
+<<<<<<< HEAD
           location.reload(); // Recharger seulement après suppression
+=======
+          location.reload();
+>>>>>>> 1cd65712c46d71c9feb689aa53868dd163eb5fe7
         }
       });
     }
@@ -266,10 +286,13 @@ $(document).ready(function () {
     $('.eqLogicThumbnailDisplay').show();
   });
   
+<<<<<<< HEAD
   $('.eqLogicAction[data-action="gotoPluginConf"]').on('click', function () {
     window.location.href = 'index.php?v=d&p=plugin&id=n8nconnect&plugin=n8nconnect';
   });
   
+=======
+>>>>>>> 1cd65712c46d71c9feb689aa53868dd163eb5fe7
   $('.eqLogicDisplayCard').on('click', function () {
     var eqLogic_id = $(this).attr('data-eqLogic_id');
     $.ajax({
@@ -281,8 +304,12 @@ $(document).ready(function () {
       },
       dataType: 'json',
       error: function (request, status, error) {
+<<<<<<< HEAD
         console.error('Erreur AJAX:', request.responseText);
         $('#div_alert').showAlert({message: '{{Erreur lors du chargement}}', level: 'danger'});
+=======
+        handleAjaxError(request, status, error);
+>>>>>>> 1cd65712c46d71c9feb689aa53868dd163eb5fe7
       },
       success: function (data) {
         if (data.state != 'ok') {
@@ -293,18 +320,24 @@ $(document).ready(function () {
         $('.eqLogicThumbnailDisplay').hide();
         $('.eqLogic').show();
         loadCmd();
+<<<<<<< HEAD
         // Recharger les workflows quand on ouvre un équipement
         if ($('#bt_refreshWorkflow').length) {
           loadWorkflows();
         }
+=======
+>>>>>>> 1cd65712c46d71c9feb689aa53868dd163eb5fe7
       }
     });
   });
   
   function loadCmd() {
     var eqLogic_id = $('.eqLogicAttr[data-l1key=id]').value();
+<<<<<<< HEAD
     if (!eqLogic_id) return;
     
+=======
+>>>>>>> 1cd65712c46d71c9feb689aa53868dd163eb5fe7
     $.ajax({
       type: 'POST',
       url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
@@ -314,8 +347,12 @@ $(document).ready(function () {
       },
       dataType: 'json',
       error: function (request, status, error) {
+<<<<<<< HEAD
         console.error('Erreur AJAX:', request.responseText);
         $('#div_alert').showAlert({message: '{{Erreur lors du chargement des commandes}}', level: 'danger'});
+=======
+        handleAjaxError(request, status, error);
+>>>>>>> 1cd65712c46d71c9feb689aa53868dd163eb5fe7
       },
       success: function (data) {
         if (data.state != 'ok') {

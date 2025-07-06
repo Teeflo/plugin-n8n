@@ -19,12 +19,37 @@ require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
 // Fonction exécutée automatiquement après l'installation du plugin
 function n8nconnect_install() {
+    // Vérifier que cURL est disponible
+    if (!function_exists('curl_init')) {
+        throw new Exception('L\'extension cURL de PHP est requise pour ce plugin');
+    }
+    
+    // Créer le dossier de logs s'il n'existe pas
+    $logDir = dirname(__FILE__) . '/../../../log/n8nconnect';
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0755, true);
+    }
+    
+    log::add('n8nconnect', 'info', 'Installation du plugin n8nconnect terminée');
 }
 
 // Fonction exécutée automatiquement après la mise à jour du plugin
 function n8nconnect_update() {
+    // Vérifier que cURL est disponible
+    if (!function_exists('curl_init')) {
+        throw new Exception('L\'extension cURL de PHP est requise pour ce plugin');
+    }
+    
+    // Créer le dossier de logs s'il n'existe pas
+    $logDir = dirname(__FILE__) . '/../../../log/n8nconnect';
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0755, true);
+    }
+    
+    log::add('n8nconnect', 'info', 'Mise à jour du plugin n8nconnect terminée');
 }
 
 // Fonction exécutée automatiquement après la suppression du plugin
 function n8nconnect_remove() {
+    log::add('n8nconnect', 'info', 'Suppression du plugin n8nconnect');
 }
