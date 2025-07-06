@@ -42,6 +42,7 @@ if (!isConnect()) {
       <div class="col-md-2">
         <a class="btn btn-default" id="bt_testN8N"><i class="fas fa-check"></i> {{Tester}}</a>
       </div>
+    </div>
     <div class="form-group">
       <label class="col-md-4 control-label">{{Identifiant Basic Auth}}
         <sup><i class="fas fa-question-circle tooltips" title="{{Laisser vide si votre instance n8n n'est pas protégée par Basic Auth}}"></i></sup>
@@ -56,9 +57,6 @@ if (!isConnect()) {
       </label>
       <div class="col-md-4">
         <input class="configKey form-control" data-l1key="n8n_pass" type="password"/>
-      </div>
-      <div class="col-md-2">
-        <a class="btn btn-default" id="bt_testN8N"><i class="fas fa-check"></i> {{Tester}}</a>
       </div>
     </div>
   </fieldset>
