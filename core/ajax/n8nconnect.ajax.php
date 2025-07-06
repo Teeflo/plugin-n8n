@@ -1,6 +1,7 @@
 <?php
 try {
     require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
+    require_once dirname(__FILE__) . '/../class/n8nconnect.class.php';
     include_file('core', 'authentification', 'php');
 
     if (!isConnect('admin')) {
@@ -36,6 +37,14 @@ try {
             $msg .= ' - ' . $decoded['message'];
         }
         throw new Exception($msg);
+    }
+
+    if (init('action') == 'listWorkflows') {
+        $list = [];
+        foreach (n8nconnect::callN8n('GET', '/workflows?limit=250')['data'] as $wf) {
+            $list[$wf['id']] = $wf['name'];
+        }
+        ajax::success($list);
     }
 
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));

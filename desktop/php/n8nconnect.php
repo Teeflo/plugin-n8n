@@ -128,11 +128,16 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
 							<legend><i class="fas fa-cogs"></i> {{Paramètres spécifiques}}</legend>
                                                         <div class="form-group">
-                                                                <label class="col-sm-4 control-label">{{ID du workflow}}
-                                                                        <sup><i class="fas fa-question-circle tooltips" title="{{Identifiant du workflow dans n8n}}"></i></sup>
+                                                                <label class="col-sm-4 control-label">{{Workflow}}
+                                                                        <sup><i class="fas fa-question-circle tooltips" title="{{Sélectionnez le workflow à piloter}}"></i></sup>
                                                                 </label>
                                                                 <div class="col-sm-6">
-                                                                        <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="workflow_id" placeholder="123">
+                                                                        <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="workflow_id" id="sel_workflow">
+                                                                                <option value="">{{Aucun}}</option>
+                                                                        </select>
+                                                                </div>
+                                                                <div class="col-sm-2">
+                                                                        <a class="btn btn-default" id="bt_refreshWorkflows"><i class="fas fa-sync"></i> {{Rafraîchir}}</a>
                                                                 </div>
                                                         </div>
 							<!-- Exemple de champ de saisie du cron d'auto-actualisation avec assistant -->

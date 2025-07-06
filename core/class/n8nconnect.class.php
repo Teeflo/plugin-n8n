@@ -19,6 +19,45 @@ require_once __DIR__  . '/../../../../core/php/core.inc.php';
 
 class n8nconnect extends eqLogic {
 
+    public function postSave() {
+        $cmds = [
+            'run' => ['name' => __('Lancer', __FILE__), 'type' => 'action', 'subType' => 'other'],
+            'activate' => ['name' => __('Activer', __FILE__), 'type' => 'action', 'subType' => 'other'],
+            'deactivate' => ['name' => __('Désactiver', __FILE__), 'type' => 'action', 'subType' => 'other'],
+            'state' => ['name' => __('État', __FILE__), 'type' => 'info', 'subType' => 'binary'],
+        ];
+        foreach ($cmds as $logical => $info) {
+            $cmd = $this->getCmd(null, $logical);
+            if (!is_object($cmd)) {
+                $cmd = new n8nconnectCmd();
+                $cmd->setLogicalId($logical);
+                $cmd->setEqLogic($this);
+            }
+            $cmd->setName($info['name']);
+            $cmd->setType($info['type']);
+            $cmd->setSubType($info['subType']);
+            $cmd->save();
+        }
+        $this->refreshState();
+    }
+
+    public function refreshState() {
+        try {
+            $id = $this->getConfiguration('workflow_id');
+            if (ctype_digit((string) $id)) {
+                $data = self::callN8n('GET', '/workflows/' . $id);
+                $state = isset($data['active']) && $data['active'] ? 1 : 0;
+                $cmd = $this->getCmd(null, 'state');
+                if (is_object($cmd)) {
+                    $cmd->event($state);
+                }
+            }
+        } catch (Exception $e) {
+            // ignore update errors but log
+            log::add('n8nconnect', 'error', $e->getMessage());
+        }
+    }
+
     public static function callN8n($method, $endpoint, $data = null) {
         $base = trim(config::byKey('n8n_url', 'n8nconnect'), '/');
         $key = config::byKey('n8n_api_key', 'n8nconnect');
@@ -67,7 +106,9 @@ class n8nconnect extends eqLogic {
         if (!ctype_digit((string) $id)) {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
-        return self::callN8n('POST', '/workflows/' . $id . '/run');
+        $res = self::callN8n('POST', '/workflows/' . $id . '/run');
+        $this->refreshState();
+        return $res;
     }
 
     public function activate() {
@@ -76,6 +117,7 @@ class n8nconnect extends eqLogic {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
         self::callN8n('POST', '/workflows/' . $id . '/activate');
+        $this->refreshState();
     }
 
     public function deactivate() {
@@ -84,6 +126,7 @@ class n8nconnect extends eqLogic {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
         self::callN8n('POST', '/workflows/' . $id . '/deactivate');
+        $this->refreshState();
     }
 }
 
