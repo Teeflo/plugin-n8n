@@ -6,11 +6,13 @@
     },
     "licence" : "AGPL",
     "author" : "Jeedom Community",
+    "version" : "1.0.0",
     "require" : "4.2.0",
     "category" : "communication",
     "hasDependency" : false,
     "hasOwnDeamon" : false,
     "maxDependancyInstallTime" : 0,
     "language": ["fr_FR","en_US"],
-    "compatibility": ["miniplus","smart","rpi","docker","diy","mobile","v4","atlas"]
+    "compatibility": ["miniplus","smart","rpi","docker","diy","mobile","v4","atlas"],
+    "documentation" : "https://github.com/jeedom/plugin-n8n/blob/master/docs/fr_FR/index.md"
 }
