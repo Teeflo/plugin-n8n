@@ -36,6 +36,8 @@ class n8nconnect extends eqLogic {
             'X-N8N-API-KEY: ' . $key,
         ];
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 15);
         if ($data !== null) {
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
         }
@@ -50,7 +52,11 @@ class n8nconnect extends eqLogic {
         if ($code < 200 || $code >= 300) {
             throw new Exception('HTTP ' . $code . ' : ' . $response);
         }
-        return json_decode($response, true);
+        $decoded = json_decode($response, true);
+        if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('Invalid JSON response');
+        }
+        return $decoded;
     }
 
     public function launch() {
@@ -58,16 +64,25 @@ class n8nconnect extends eqLogic {
         if ($id == '') {
             throw new Exception(__('ID de workflow manquant', __FILE__));
         }
+        if (!ctype_digit((string) $id)) {
+            throw new Exception(__('ID de workflow invalide', __FILE__));
+        }
         return self::callN8n('POST', '/workflows/' . $id . '/run');
     }
 
     public function activate() {
         $id = $this->getConfiguration('workflow_id');
+        if (!ctype_digit((string) $id)) {
+            throw new Exception(__('ID de workflow invalide', __FILE__));
+        }
         self::callN8n('POST', '/workflows/' . $id . '/activate');
     }
 
     public function deactivate() {
         $id = $this->getConfiguration('workflow_id');
+        if (!ctype_digit((string) $id)) {
+            throw new Exception(__('ID de workflow invalide', __FILE__));
+        }
         self::callN8n('POST', '/workflows/' . $id . '/deactivate');
     }
 }

@@ -15,6 +15,8 @@ try {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url . '/api/v1/workflows?limit=1');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 15);
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
             'Accept: application/json',
             'X-N8N-API-KEY: ' . $key,
