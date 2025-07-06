@@ -19,43 +19,62 @@ require_once __DIR__  . '/../../../../core/php/core.inc.php';
 
 class n8nconnect extends eqLogic {
 
-    public static function callN8n($method, $endpoint, $data = null) {
+    private static function buildUrl($endpoint) {
         $base = trim(config::byKey('n8n_url', 'n8nconnect'), '/');
-        $key = config::byKey('n8n_api_key', 'n8nconnect');
-        if ($base == '' || $key == '') {
-            throw new Exception(__('Configuration n8n incomplète', __FILE__));
+        if ($base === '' || !filter_var($base, FILTER_VALIDATE_URL)) {
+            throw new Exception(__('URL n8n invalide', __FILE__));
         }
-        $url = $base . '/api/v1' . $endpoint;
+        return $base . '/api/v1' . $endpoint;
+    }
+
+    public static function callN8n($method, $endpoint, $data = null) {
+        $key = config::byKey('n8n_api_key', 'n8nconnect');
+        if ($key === '') {
+            throw new Exception(__('Clé API n8n manquante', __FILE__));
+        }
+
+        $url = self::buildUrl($endpoint);
+        log::add('n8nconnect', 'debug', 'Call ' . $method . ' ' . $url);
+
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
-        $headers = [
-            'Accept: application/json',
-            'Content-Type: application/json',
-            'X-N8N-API-KEY: ' . $key,
-        ];
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 15);
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_HTTPHEADER => [
+                'Accept: application/json',
+                'Content-Type: application/json',
+                'X-N8N-API-KEY: ' . $key,
+            ],
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_USERAGENT => 'Jeedom-n8nconnect',
+        ]);
+
         if ($data !== null) {
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
         }
+
         $response = curl_exec($curl);
         if ($response === false) {
             $msg = curl_error($curl);
             curl_close($curl);
             throw new Exception('Curl error : ' . $msg);
         }
+
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
+
         if ($code < 200 || $code >= 300) {
             throw new Exception('HTTP ' . $code . ' : ' . $response);
         }
+
         $decoded = json_decode($response, true);
         if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception('Invalid JSON response');
         }
+
         return $decoded;
     }
 
@@ -67,6 +86,7 @@ class n8nconnect extends eqLogic {
         if (!ctype_digit((string) $id)) {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
+        log::add('n8nconnect', 'info', 'Run workflow #' . $id);
         return self::callN8n('POST', '/workflows/' . $id . '/run');
     }
 
@@ -75,6 +95,7 @@ class n8nconnect extends eqLogic {
         if (!ctype_digit((string) $id)) {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
+        log::add('n8nconnect', 'info', 'Activate workflow #' . $id);
         self::callN8n('POST', '/workflows/' . $id . '/activate');
     }
 
@@ -83,6 +104,7 @@ class n8nconnect extends eqLogic {
         if (!ctype_digit((string) $id)) {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
+        log::add('n8nconnect', 'info', 'Deactivate workflow #' . $id);
         self::callN8n('POST', '/workflows/' . $id . '/deactivate');
     }
 }
@@ -91,8 +113,7 @@ class n8nconnectCmd extends cmd {
     public function execute($_options = array()) {
         switch ($this->getLogicalId()) {
             case 'run':
-                $this->getEqLogic()->launch();
-                return;
+                return $this->getEqLogic()->launch();
             case 'activate':
                 $this->getEqLogic()->activate();
                 return;
@@ -100,6 +121,7 @@ class n8nconnectCmd extends cmd {
                 $this->getEqLogic()->deactivate();
                 return;
             default:
+                log::add('n8nconnect', 'error', __('Commande inconnue', __FILE__) . ' : ' . $this->getLogicalId());
                 throw new Exception(__('Commande inconnue', __FILE__));
         }
     }
