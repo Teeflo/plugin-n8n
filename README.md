@@ -4,7 +4,7 @@ Ce plugin permet de piloter des workflows **n8n** directement depuis Jeedom. Il 
 
 ## Fonctionnalités
 
-- Configuration d'une instance n8n (URL, clé API et identifiants Basic Auth facultatifs).
+- Configuration d'une instance n8n (URL et clé API).
 - Création d'équipements représentant chaque workflow à contrôler.
 - Commandes pour lancer, activer ou désactiver un workflow.
 
@@ -26,7 +26,6 @@ Ce dépôt est basé sur le template officiel de plugin Jeedom et fournit un poi
 4. Configurez :
    - **URL de l'instance n8n** (ex: `https://mon.n8n.local`)
    - **Clé API** (générée dans n8n > Settings > API)
-   - **Identifiant et mot de passe Basic Auth** (optionnel)
 5. Testez la connexion avec le bouton **"Tester"**
 
 ## Dépannage
@@ -38,7 +37,6 @@ Si vous rencontrez cette erreur lors de la création d'équipements :
 1. **Vérifiez votre configuration** :
    - URL de l'instance n8n correcte et accessible
    - Clé API valide et non expirée
-   - Identifiants Basic Auth corrects (si configurés)
 
 2. **Testez la connectivité** :
    - Utilisez le bouton "Tester" dans la configuration

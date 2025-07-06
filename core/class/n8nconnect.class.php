@@ -22,8 +22,10 @@ class n8nconnect extends eqLogic {
     public static function callN8n($method, $endpoint, $data = null) {
         $base = trim(config::byKey('n8n_url', 'n8nconnect'), '/');
         $key = config::byKey('n8n_api_key', 'n8nconnect');
-        $user = config::byKey('n8n_user', 'n8nconnect');
-        $pass = config::byKey('n8n_pass', 'n8nconnect');
+        
+        // Log de debug pour voir la valeur de la clé
+        log::add('n8nconnect', 'debug', 'URL configurée : ' . $base);
+        log::add('n8nconnect', 'debug', 'Clé API configurée : ' . (empty($key) ? 'VIDE' : substr($key, 0, 10) . '...'));
         
         // Vérification de la configuration
         if ($base == '') {
@@ -31,6 +33,12 @@ class n8nconnect extends eqLogic {
         }
         if ($key == '') {
             throw new Exception(__('Clé API n8n manquante dans la configuration', __FILE__));
+        }
+        
+        // Vérifier si la clé commence par "crypt:" (cryptée par Jeedom)
+        if (strpos($key, 'crypt:') === 0) {
+            log::add('n8nconnect', 'error', 'La clé API est cryptée par Jeedom. Problème de configuration.');
+            throw new Exception(__('La clé API est cryptée. Veuillez la reconfigurer dans les paramètres du plugin.', __FILE__));
         }
         
         // Nettoyage de l'URL de base
@@ -55,12 +63,6 @@ class n8nconnect extends eqLogic {
             'X-N8N-API-KEY: ' . $key,
         ];
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        
-        // Ajout de l'authentification Basic si configurée
-        if ($user != '' || $pass != '') {
-            curl_setopt($curl, CURLOPT_USERPWD, $user . ':' . $pass);
-            log::add('n8nconnect', 'debug', 'Authentification Basic configurée pour l\'utilisateur : ' . $user);
-        }
         
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt($curl, CURLOPT_TIMEOUT, 30);
@@ -95,7 +97,7 @@ class n8nconnect extends eqLogic {
             // Messages d'erreur spécifiques selon le code
             switch ($code) {
                 case 401:
-                    $errorMsg = __('Erreur d\'authentification (401) : Vérifiez votre clé API et vos identifiants Basic Auth', __FILE__);
+                    $errorMsg = __('Erreur d\'authentification (401) : Vérifiez votre clé API', __FILE__);
                     break;
                 case 403:
                     $errorMsg = __('Accès interdit (403) : Vérifiez les permissions de votre clé API', __FILE__);
@@ -124,6 +126,29 @@ class n8nconnect extends eqLogic {
     }
 
     public function postSave() {
+        // Ne créer les commandes que si l'équipement a un ID valide et qu'il n'y a pas déjà de commandes
+        if ($this->getId() == '') {
+            return;
+        }
+        
+        // Vérifier s'il y a déjà des commandes
+        $existingCmds = $this->getCmd();
+        if (count($existingCmds) > 0) {
+            // Les commandes existent déjà, pas besoin de les recréer
+            $this->refreshInfo();
+            return;
+        }
+        
+        // Vérifier la configuration avant de créer les commandes
+        $base = config::byKey('n8n_url', 'n8nconnect');
+        $key = config::byKey('n8n_api_key', 'n8nconnect');
+        
+        if (empty($base) || empty($key)) {
+            log::add('n8nconnect', 'warning', 'Configuration incomplète lors de la sauvegarde de l\'équipement');
+            // Ne pas bloquer la création, juste afficher un avertissement
+            return;
+        }
+        
         $commands = [
             'run' => ['name' => __('Lancer', __FILE__), 'type' => 'action', 'subType' => 'other'],
             'activate' => ['name' => __('Activer', __FILE__), 'type' => 'action', 'subType' => 'other'],
@@ -131,16 +156,14 @@ class n8nconnect extends eqLogic {
             'state' => ['name' => __('État', __FILE__), 'type' => 'info', 'subType' => 'binary']
         ];
         foreach ($commands as $logical => $info) {
-            $cmd = $this->getCmd(null, $logical);
-            if (!is_object($cmd)) {
-                $cmd = new n8nconnectCmd();
-                $cmd->setLogicalId($logical);
-                $cmd->setEqLogic_id($this->getId());
-                $cmd->setType($info['type']);
-                $cmd->setSubType($info['subType']);
-            }
+            $cmd = new n8nconnectCmd();
+            $cmd->setLogicalId($logical);
+            $cmd->setEqLogic_id($this->getId());
+            $cmd->setType($info['type']);
+            $cmd->setSubType($info['subType']);
             $cmd->setName($info['name']);
-            $cmd->setIsVisible($logical !== 'state');
+            $cmd->setIsVisible(($logical !== 'state') ? 1 : 0);
+            $cmd->setIsHistorized(($logical === 'state') ? 1 : 0);
             $cmd->save();
         }
         $this->refreshInfo();

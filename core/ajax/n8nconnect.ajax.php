@@ -14,8 +14,6 @@ try {
     if (init('action') == 'test') {
         $url = rtrim(init('url'), '/');
         $key = init('key');
-        $user = init('user');
-        $pass = init('pass');
         
         // Vérifications préliminaires
         if (empty($url)) {
@@ -40,11 +38,6 @@ try {
             'Accept: application/json',
             'X-N8N-API-KEY: ' . $key,
         ]);
-        
-        if ($user != '' || $pass != '') {
-            curl_setopt($curl, CURLOPT_USERPWD, $user . ':' . $pass);
-            log::add('n8nconnect', 'debug', 'Authentification Basic configurée');
-        }
         
         $resp = curl_exec($curl);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -78,7 +71,7 @@ try {
             // Messages d'erreur spécifiques
             switch ($code) {
                 case 401:
-                    $errorMsg = __('Erreur d\'authentification (401) : Vérifiez votre clé API et vos identifiants Basic Auth', __FILE__);
+                    $errorMsg = __('Erreur d\'authentification (401) : Vérifiez votre clé API', __FILE__);
                     break;
                 case 403:
                     $errorMsg = __('Accès interdit (403) : Vérifiez les permissions de votre clé API', __FILE__);
@@ -95,6 +88,8 @@ try {
             throw new Exception($errorMsg);
         }
     }
+
+
 
     if (init('action') == 'listWorkflows') {
         try {
@@ -113,7 +108,7 @@ try {
             // Message d'erreur plus informatif pour l'utilisateur
             $errorMsg = $e->getMessage();
             if (strpos($errorMsg, '401') !== false) {
-                $errorMsg = __('Impossible de se connecter à n8n. Vérifiez votre configuration : URL, clé API et identifiants Basic Auth.', __FILE__);
+                $errorMsg = __('Impossible de se connecter à n8n. Vérifiez votre configuration : URL et clé API.', __FILE__);
             } elseif (strpos($errorMsg, '404') !== false) {
                 $errorMsg = __('URL de l\'instance n8n incorrecte ou instance n8n non accessible.', __FILE__);
             } elseif (strpos($errorMsg, 'timeout') !== false) {
@@ -124,6 +119,82 @@ try {
         }
     }
 
+    // Gestion des actions d'équipement standard de Jeedom
+    if (init('action') == 'add') {
+        $eqLogic = new n8nconnect();
+        $eqLogic->setName(__('Nouveau workflow n8n', __FILE__));
+        $eqLogic->setEqType_name('n8nconnect');
+        $eqLogic->setIsEnable(1);
+        $eqLogic->setIsVisible(1);
+        $eqLogic->save();
+        ajax::success(utils::o2a($eqLogic));
+    }
+    
+    if (init('action') == 'get') {
+        $eqLogic = n8nconnect::byId(init('id'));
+        if (!is_object($eqLogic)) {
+            throw new Exception(__('Équipement introuvable', __FILE__));
+        }
+        ajax::success(utils::o2a($eqLogic));
+    }
+    
+    if (init('action') == 'save') {
+        $eqLogicData = json_decode(init('eqLogic'), true);
+        log::add('n8nconnect', 'debug', 'Données reçues pour sauvegarde : ' . json_encode($eqLogicData));
+        
+        if (!is_array($eqLogicData)) {
+            throw new Exception(__('Données d\'équipement invalides', __FILE__));
+        }
+        
+        // Si l'ID est vide, créer un nouvel équipement
+        if (empty($eqLogicData['id'])) {
+            log::add('n8nconnect', 'debug', 'Création d\'un nouvel équipement');
+            $eqLogic = new n8nconnect();
+        } else {
+            log::add('n8nconnect', 'debug', 'Modification de l\'équipement ID : ' . $eqLogicData['id']);
+            $eqLogic = n8nconnect::byId($eqLogicData['id']);
+            if (!is_object($eqLogic)) {
+                throw new Exception(__('Équipement introuvable', __FILE__));
+            }
+        }
+        
+        utils::a2o($eqLogic, jeedom::fromHumanReadable($eqLogicData));
+        $eqLogic->save();
+        log::add('n8nconnect', 'debug', 'Équipement sauvegardé avec succès, ID : ' . $eqLogic->getId());
+        ajax::success(utils::o2a($eqLogic));
+    }
+    
+    if (init('action') == 'remove') {
+        $eqLogic = n8nconnect::byId(init('id'));
+        if (!is_object($eqLogic)) {
+            throw new Exception(__('Équipement introuvable', __FILE__));
+        }
+        $eqLogic->remove();
+        ajax::success();
+    }
+    
+    if (init('action') == 'getAll') {
+        $eqLogics = n8nconnect::byType('n8nconnect');
+        $result = [];
+        foreach ($eqLogics as $eqLogic) {
+            $result[] = utils::o2a($eqLogic);
+        }
+        ajax::success($result);
+    }
+    
+    if (init('action') == 'getCmd') {
+        $eqLogic = n8nconnect::byId(init('id'));
+        if (!is_object($eqLogic)) {
+            throw new Exception(__('Équipement introuvable', __FILE__));
+        }
+        $cmds = $eqLogic->getCmd();
+        $result = [];
+        foreach ($cmds as $cmd) {
+            $result[] = utils::o2a($cmd);
+        }
+        ajax::success($result);
+    }
+    
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
 } catch (Exception $e) {
     ajax::error(displayException($e), $e->getCode());

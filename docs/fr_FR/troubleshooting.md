@@ -17,11 +17,7 @@ L'erreur HTTP 401 "unauthorized" apparaît lors de la création d'équipements d
    - L'URL ne pointe pas vers la bonne instance n8n
    - Problème de résolution DNS
 
-3. **Problème d'authentification Basic Auth**
-   - Identifiants Basic Auth incorrects
-   - Configuration Basic Auth manquante si nécessaire
-
-4. **Problème de configuration n8n**
+3. **Problème de configuration n8n**
    - API REST non activée dans n8n
    - Instance n8n non accessible
    - Problème de certificat SSL
@@ -34,7 +30,6 @@ L'erreur HTTP 401 "unauthorized" apparaît lors de la création d'équipements d
 2. Vérifiez que tous les champs sont correctement remplis :
    - **URL de l'instance n8n** : Doit être l'adresse complète (ex: `https://mon.n8n.local`)
    - **Clé API** : Doit être la clé API valide de votre instance n8n
-   - **Identifiant et mot de passe Basic Auth** : Si votre n8n est protégé par Basic Auth
 
 #### 2. Tester la connexion
 
@@ -95,7 +90,7 @@ Les logs contiennent des informations détaillées sur :
 ### Messages d'erreur courants
 
 - **"Configuration n8n incomplète"** : URL ou clé API manquante
-- **"Erreur d'authentification (401)"** : Clé API ou identifiants incorrects
+- **"Erreur d'authentification (401)"** : Clé API incorrecte
 - **"URL de l'instance n8n incorrecte"** : Problème de connectivité ou URL erronée
 - **"Délai d'attente dépassé"** : Instance n8n non accessible ou lente
 
@@ -109,4 +104,4 @@ Si le problème persiste après avoir suivi ces étapes :
    - Version de Jeedom
    - Version de n8n
    - Messages d'erreur exacts
-   - Configuration du plugin (sans les mots de passe) 
+   - Configuration du plugin (sans la clé API) 
