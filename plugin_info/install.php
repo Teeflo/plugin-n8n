@@ -19,10 +19,18 @@ require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
 // Fonction exécutée automatiquement après l'installation du plugin
 function n8nconnect_install() {
+    $key = config::byKey('n8n_api_key', 'n8nconnect');
+    if ($key != '') {
+        config::save('n8n_api_key', utils::encrypt($key), 'n8nconnect');
+    }
 }
 
 // Fonction exécutée automatiquement après la mise à jour du plugin
 function n8nconnect_update() {
+    $key = config::byKey('n8n_api_key', 'n8nconnect');
+    if ($key != '' && utils::decrypt($key) === $key) {
+        config::save('n8n_api_key', utils::encrypt($key), 'n8nconnect');
+    }
 }
 
 // Fonction exécutée automatiquement après la suppression du plugin

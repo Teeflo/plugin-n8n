@@ -22,10 +22,14 @@ class n8nconnect extends eqLogic {
     public static function callN8n($method, $endpoint, $data = null) {
         $base = trim(config::byKey('n8n_url', 'n8nconnect'), '/');
         $key = config::byKey('n8n_api_key', 'n8nconnect');
+        if ($key !== '') {
+            $key = utils::decrypt($key);
+        }
         if ($base == '' || $key == '') {
             throw new Exception(__('Configuration n8n incomplète', __FILE__));
         }
         $url = $base . '/api/v1' . $endpoint;
+        log::add('n8nconnect', 'debug', 'API ' . $method . ' ' . $url);
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -49,6 +53,7 @@ class n8nconnect extends eqLogic {
         }
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
+        log::add('n8nconnect', 'debug', 'HTTP ' . $code . ' reçu');
         if ($code < 200 || $code >= 300) {
             throw new Exception('HTTP ' . $code . ' : ' . $response);
         }
@@ -84,6 +89,26 @@ class n8nconnect extends eqLogic {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
         self::callN8n('POST', '/workflows/' . $id . '/deactivate');
+    }
+
+    public function postSave() {
+        $cmds = [
+            'run' => __('Lancer', __FILE__),
+            'activate' => __('Activer', __FILE__),
+            'deactivate' => __('Désactiver', __FILE__),
+        ];
+        foreach ($cmds as $logical => $name) {
+            $cmd = $this->getCmd(null, $logical);
+            if (!is_object($cmd)) {
+                $cmd = new n8nconnectCmd();
+                $cmd->setEqLogic_id($this->getId());
+                $cmd->setLogicalId($logical);
+                $cmd->setType('action');
+                $cmd->setSubType('other');
+            }
+            $cmd->setName($name);
+            $cmd->save();
+        }
     }
 }
 

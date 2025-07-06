@@ -7,5 +7,6 @@ Ce plugin permet de piloter des workflows **n8n** directement depuis Jeedom. Il 
 - Configuration d'une instance n8n (URL et clé API).
 - Création d'équipements représentant chaque workflow à contrôler.
 - Commandes pour lancer, activer ou désactiver un workflow.
+- Stockage chiffré de la clé API et validation de la configuration.
 
 Ce dépôt est basé sur le template officiel de plugin Jeedom et fournit un point de départ pour développer des interactions avancées entre Jeedom et n8n.

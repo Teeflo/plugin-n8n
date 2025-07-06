@@ -12,7 +12,14 @@ try {
     if (init('action') == 'test') {
         $url = rtrim(init('url'), '/');
         $key = init('key');
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new Exception(__('URL invalide', __FILE__));
+        }
+        if ($key == '') {
+            throw new Exception(__('Clé API manquante', __FILE__));
+        }
         $curl = curl_init();
+        log::add('n8nconnect', 'debug', 'Test connexion vers ' . $url);
         curl_setopt($curl, CURLOPT_URL, $url . '/api/v1/workflows?limit=1');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
@@ -23,9 +30,12 @@ try {
         ]);
         $resp = curl_exec($curl);
         if ($resp === false) {
-            throw new Exception(curl_error($curl));
+            $err = curl_error($curl);
+            log::add('n8nconnect', 'error', 'Curl error: ' . $err);
+            throw new Exception($err);
         }
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        log::add('n8nconnect', 'debug', 'HTTP ' . $code . ' reçu');
         curl_close($curl);
         if ($code === 200) {
             ajax::success(__('Connexion réussie', __FILE__));

@@ -29,7 +29,7 @@ if (!isConnect()) {
         <sup><i class="fas fa-question-circle tooltips" title="{{Adresse de base de votre instance n8n}}"></i></sup>
       </label>
       <div class="col-md-4">
-        <input class="configKey form-control" data-l1key="n8n_url" placeholder="https://mon.n8n.local"/>
+        <input class="configKey form-control" data-l1key="n8n_url" type="text" placeholder="https://mon.n8n.local" pattern="https?://.+"/>
       </div>
     </div>
     <div class="form-group">
@@ -37,7 +37,7 @@ if (!isConnect()) {
         <sup><i class="fas fa-question-circle tooltips" title="{{Clé API pour l'accès REST à n8n}}"></i></sup>
       </label>
       <div class="col-md-4">
-        <input class="configKey form-control" data-l1key="n8n_api_key"/>
+        <input class="configKey form-control" data-l1key="n8n_api_key" type="password" autocomplete="new-password"/>
       </div>
       <div class="col-md-2">
         <a class="btn btn-default" id="bt_testN8N"><i class="fas fa-check"></i> {{Tester}}</a>

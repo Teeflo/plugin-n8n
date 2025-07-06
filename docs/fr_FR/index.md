@@ -4,7 +4,7 @@ Ce plugin permet de relier Jeedom à une instance **n8n** afin de contrôler et 
 
 ## Configuration
 
-Renseignez dans la page de configuration l'URL de votre instance n8n ainsi que la clé API dédiée. Vous pourrez ensuite créer un équipement par workflow à piloter.
+Renseignez dans la page de configuration l'URL de votre instance n8n ainsi que la clé API dédiée (cette dernière est enregistrée de manière chiffrée). Vous pourrez ensuite créer un équipement par workflow à piloter.
 
 ## Commandes disponibles
 
