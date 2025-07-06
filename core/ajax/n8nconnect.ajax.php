@@ -7,6 +7,8 @@ try {
         throw new Exception(__('401 - Accès non autorisé', __FILE__));
     }
 
+    require_once dirname(__FILE__) . '/../class/n8nconnect.class.php';
+
     ajax::init();
 
     if (init('action') == 'test') {
@@ -36,6 +38,17 @@ try {
             $msg .= ' - ' . $decoded['message'];
         }
         throw new Exception($msg);
+    }
+
+    if (init('action') == 'listWorkflows') {
+        $data = n8nconnect::callN8n('GET', '/workflows');
+        $result = [];
+        if (isset($data['data'])) {
+            foreach ($data['data'] as $wf) {
+                $result[] = ['id' => $wf['id'], 'name' => $wf['name']];
+            }
+        }
+        ajax::success($result);
     }
 
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));

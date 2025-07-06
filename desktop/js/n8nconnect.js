@@ -85,3 +85,37 @@ function addCmdToTable(_cmd) {
     }
   })
 }
+
+function loadWorkflows () {
+  $.ajax({
+    type: 'POST',
+    url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
+    data: {action: 'listWorkflows'},
+    dataType: 'json',
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error)
+    },
+    success: function (data) {
+      if (data.state != 'ok') {
+        $('#div_alert').showAlert({message: data.result, level: 'danger'})
+        return
+      }
+      var select = $('#sel_workflow')
+      select.empty()
+      $.each(data.result, function (i, wf) {
+        select.append('<option value="' + wf.id + '">' + wf.name + '</option>')
+      })
+      select.val($('.eqLogicAttr[data-l1key=configuration][data-l2key=workflow_id]').val())
+    }
+  })
+}
+
+$('#bt_refreshWorkflow').on('click', function () {
+  loadWorkflows()
+})
+
+$(document).ready(function () {
+  if ($('#bt_refreshWorkflow').length) {
+    loadWorkflows()
+  }
+})

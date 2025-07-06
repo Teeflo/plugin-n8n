@@ -59,6 +59,53 @@ class n8nconnect extends eqLogic {
         return $decoded;
     }
 
+    public function postSave() {
+        $commands = [
+            'run' => ['name' => __('Lancer', __FILE__), 'type' => 'action', 'subType' => 'other'],
+            'activate' => ['name' => __('Activer', __FILE__), 'type' => 'action', 'subType' => 'other'],
+            'deactivate' => ['name' => __('Désactiver', __FILE__), 'type' => 'action', 'subType' => 'other'],
+            'state' => ['name' => __('État', __FILE__), 'type' => 'info', 'subType' => 'binary']
+        ];
+        foreach ($commands as $logical => $info) {
+            $cmd = $this->getCmd(null, $logical);
+            if (!is_object($cmd)) {
+                $cmd = new n8nconnectCmd();
+                $cmd->setLogicalId($logical);
+                $cmd->setEqLogic_id($this->getId());
+                $cmd->setType($info['type']);
+                $cmd->setSubType($info['subType']);
+            }
+            $cmd->setName($info['name']);
+            $cmd->setIsVisible($logical !== 'state');
+            $cmd->save();
+        }
+        $this->refreshInfo();
+    }
+
+    public function refreshInfo() {
+        $id = $this->getConfiguration('workflow_id');
+        if (!ctype_digit((string) $id)) {
+            return;
+        }
+        try {
+            $info = self::callN8n('GET', '/workflows/' . $id);
+            $active = isset($info['active']) && $info['active'] ? 1 : 0;
+        } catch (Exception $e) {
+            $active = 0;
+            log::add('n8nconnect', 'error', 'Erreur lors de la récupération du statut : ' . $e->getMessage());
+        }
+        $cmd = $this->getCmd(null, 'state');
+        if (is_object($cmd)) {
+            $cmd->event($active);
+        }
+    }
+
+    public static function cron() {
+        foreach (self::byType('n8nconnect') as $eq) {
+            $eq->refreshInfo();
+        }
+    }
+
     public function launch() {
         $id = $this->getConfiguration('workflow_id');
         if ($id == '') {
@@ -76,6 +123,7 @@ class n8nconnect extends eqLogic {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
         self::callN8n('POST', '/workflows/' . $id . '/activate');
+        $this->refreshInfo();
     }
 
     public function deactivate() {
@@ -84,6 +132,7 @@ class n8nconnect extends eqLogic {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
         self::callN8n('POST', '/workflows/' . $id . '/deactivate');
+        $this->refreshInfo();
     }
 }
 
