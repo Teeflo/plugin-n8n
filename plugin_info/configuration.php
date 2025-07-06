@@ -66,7 +66,7 @@ $('#bt_testN8N').on('click', function(){
       if (data.state != 'ok') {
         $('#div_alert').showAlert({message: data.result, level: 'danger'});
       } else {
-        $('#div_alert').showAlert({message: '{{Connexion réussie}}', level: 'success'});
+        $('#div_alert').showAlert({message: data.result, level: 'success'});
       }
     }
   });

@@ -13,7 +13,7 @@ try {
         $url = rtrim(init('url'), '/');
         $key = init('key');
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url . '/api/v1/workflows');
+        curl_setopt($curl, CURLOPT_URL, $url . '/api/v1/workflows?limit=1');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
             'Accept: application/json',
@@ -25,10 +25,15 @@ try {
         }
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
-        if ($code >= 200 && $code < 300) {
-            ajax::success(true);
+        if ($code === 200) {
+            ajax::success(__('Connexion réussie', __FILE__));
         }
-        throw new Exception(__('Réponse invalide', __FILE__));
+        $msg = __('Code réponse', __FILE__) . ' ' . $code;
+        $decoded = json_decode($resp, true);
+        if (is_array($decoded) && isset($decoded['message'])) {
+            $msg .= ' - ' . $decoded['message'];
+        }
+        throw new Exception($msg);
     }
 
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
