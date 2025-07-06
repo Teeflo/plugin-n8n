@@ -97,35 +97,66 @@ function hideManualWorkflowInput () {
 }
 
 function loadWorkflows () {
+  // Afficher un indicateur de chargement
+  $('#bt_refreshWorkflow').html('<i class="fas fa-spinner fa-spin"></i>');
+  
   $.ajax({
     type: 'POST',
     url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
     data: {action: 'listWorkflows'},
     dataType: 'json',
+    timeout: 30000, // 30 secondes de timeout
     error: function (request, status, error) {
-      handleAjaxError(request, status, error)
-      $('#div_alert').showAlert({message: "{{Impossible de r\xE9cup\xE9rer la liste des workflows. Saisissez l'ID manuellement.}}", level: 'warning'})
-      showManualWorkflowInput()
+      // Restaurer le bouton
+      $('#bt_refreshWorkflow').html('<i class="fas fa-sync"></i>');
+      
+      var errorMessage = "{{Impossible de récupérer la liste des workflows.}}";
+      
+      if (status === 'timeout') {
+        errorMessage = "{{Délai d'attente dépassé. Vérifiez que votre instance n8n est accessible.}}";
+      } else if (request.status === 401) {
+        errorMessage = "{{Erreur d'authentification. Vérifiez votre configuration n8n.}}";
+      } else if (request.status === 404) {
+        errorMessage = "{{URL de l'instance n8n incorrecte.}}";
+      } else if (request.status >= 500) {
+        errorMessage = "{{Erreur serveur n8n. Vérifiez l'état de votre instance.}}";
+      }
+      
+      $('#div_alert').showAlert({message: errorMessage, level: 'warning'});
+      showManualWorkflowInput();
+      
+      // Log de l'erreur pour debug
+      console.error('Erreur lors du chargement des workflows:', status, error, request.responseText);
     },
     success: function (data) {
+      // Restaurer le bouton
+      $('#bt_refreshWorkflow').html('<i class="fas fa-sync"></i>');
+      
       if (data.state != 'ok') {
-        $('#div_alert').showAlert({message: data.result, level: 'danger'})
-        showManualWorkflowInput()
-        return
+        var errorMessage = data.result || "{{Erreur lors de la récupération des workflows}}";
+        $('#div_alert').showAlert({message: errorMessage, level: 'danger'});
+        showManualWorkflowInput();
+        return;
       }
-      var select = $('#sel_workflow')
-      select.empty()
-      $.each(data.result, function (i, wf) {
-        select.append('<option value="' + wf.id + '">' + wf.name + '</option>')
-      })
-      if (data.result.length === 0) {
-        showManualWorkflowInput()
+      
+      var select = $('#sel_workflow');
+      select.empty();
+      
+      if (data.result && data.result.length > 0) {
+        $.each(data.result, function (i, wf) {
+          select.append('<option value="' + wf.id + '">' + wf.name + '</option>');
+        });
+        hideManualWorkflowInput();
+        select.val($('.eqLogicAttr[data-l1key=configuration][data-l2key=workflow_id]').val());
+        
+        // Message de succès
+        $('#div_alert').showAlert({message: "{{Liste des workflows récupérée avec succès}}", level: 'success'});
       } else {
-        hideManualWorkflowInput()
-        select.val($('.eqLogicAttr[data-l1key=configuration][data-l2key=workflow_id]').val())
+        $('#div_alert').showAlert({message: "{{Aucun workflow trouvé dans votre instance n8n}}", level: 'info'});
+        showManualWorkflowInput();
       }
     }
-  })
+  });
 }
 
 $('#bt_refreshWorkflow').on('click', function () {

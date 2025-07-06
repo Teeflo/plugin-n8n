@@ -24,46 +24,102 @@ class n8nconnect extends eqLogic {
         $key = config::byKey('n8n_api_key', 'n8nconnect');
         $user = config::byKey('n8n_user', 'n8nconnect');
         $pass = config::byKey('n8n_pass', 'n8nconnect');
-        if ($base == '' || $key == '') {
-            throw new Exception(__('Configuration n8n incomplète', __FILE__));
+        
+        // Vérification de la configuration
+        if ($base == '') {
+            throw new Exception(__('URL de l\'instance n8n manquante dans la configuration', __FILE__));
         }
+        if ($key == '') {
+            throw new Exception(__('Clé API n8n manquante dans la configuration', __FILE__));
+        }
+        
+        // Nettoyage de l'URL de base
         if (substr($base, -7) === '/api/v1') {
             $base = substr($base, 0, -7);
         }
         $url = $base . '/api/v1' . $endpoint;
+        
+        // Log pour debug
+        log::add('n8nconnect', 'debug', 'Appel n8n : ' . $method . ' ' . $url);
+        
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        
         $headers = [
             'Accept: application/json',
             'Content-Type: application/json',
             'X-N8N-API-KEY: ' . $key,
         ];
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        
+        // Ajout de l'authentification Basic si configurée
         if ($user != '' || $pass != '') {
             curl_setopt($curl, CURLOPT_USERPWD, $user . ':' . $pass);
+            log::add('n8nconnect', 'debug', 'Authentification Basic configurée pour l\'utilisateur : ' . $user);
         }
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 15);
+        
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+        
         if ($data !== null) {
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
         }
+        
         $response = curl_exec($curl);
-        if ($response === false) {
-            $msg = curl_error($curl);
-            curl_close($curl);
-            throw new Exception('Curl error : ' . $msg);
-        }
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $error = curl_error($curl);
         curl_close($curl);
-        if ($code < 200 || $code >= 300) {
-            throw new Exception('HTTP ' . $code . ' : ' . $response);
+        
+        // Gestion des erreurs cURL
+        if ($response === false) {
+            log::add('n8nconnect', 'error', 'Erreur cURL : ' . $error);
+            throw new Exception('Erreur de connexion : ' . $error);
         }
+        
+        // Gestion des codes d'erreur HTTP
+        if ($code < 200 || $code >= 300) {
+            $errorMsg = 'HTTP ' . $code . ' : ';
+            
+            // Tentative de décodage de la réponse d'erreur
+            $decoded = json_decode($response, true);
+            if (is_array($decoded) && isset($decoded['message'])) {
+                $errorMsg .= $decoded['message'];
+            } else {
+                $errorMsg .= $response;
+            }
+            
+            // Messages d'erreur spécifiques selon le code
+            switch ($code) {
+                case 401:
+                    $errorMsg = __('Erreur d\'authentification (401) : Vérifiez votre clé API et vos identifiants Basic Auth', __FILE__);
+                    break;
+                case 403:
+                    $errorMsg = __('Accès interdit (403) : Vérifiez les permissions de votre clé API', __FILE__);
+                    break;
+                case 404:
+                    $errorMsg = __('Endpoint non trouvé (404) : Vérifiez l\'URL de votre instance n8n', __FILE__);
+                    break;
+                case 500:
+                    $errorMsg = __('Erreur serveur n8n (500) : Vérifiez l\'état de votre instance n8n', __FILE__);
+                    break;
+            }
+            
+            log::add('n8nconnect', 'error', 'Erreur API n8n : ' . $errorMsg . ' (URL: ' . $url . ')');
+            throw new Exception($errorMsg);
+        }
+        
+        // Décodage de la réponse JSON
         $decoded = json_decode($response, true);
         if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('Invalid JSON response');
+            log::add('n8nconnect', 'error', 'Réponse JSON invalide : ' . $response);
+            throw new Exception('Réponse JSON invalide de l\'API n8n');
         }
+        
+        log::add('n8nconnect', 'debug', 'Appel n8n réussi : ' . $method . ' ' . $endpoint);
         return $decoded;
     }
 
