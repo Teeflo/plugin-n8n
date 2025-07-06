@@ -86,6 +86,16 @@ function addCmdToTable(_cmd) {
   })
 }
 
+function showManualWorkflowInput () {
+  $('#in_workflow_id').show()
+  $('#sel_workflow').hide()
+}
+
+function hideManualWorkflowInput () {
+  $('#in_workflow_id').hide()
+  $('#sel_workflow').show()
+}
+
 function loadWorkflows () {
   $.ajax({
     type: 'POST',
@@ -94,10 +104,12 @@ function loadWorkflows () {
     dataType: 'json',
     error: function (request, status, error) {
       handleAjaxError(request, status, error)
+      showManualWorkflowInput()
     },
     success: function (data) {
       if (data.state != 'ok') {
         $('#div_alert').showAlert({message: data.result, level: 'danger'})
+        showManualWorkflowInput()
         return
       }
       var select = $('#sel_workflow')
@@ -105,7 +117,12 @@ function loadWorkflows () {
       $.each(data.result, function (i, wf) {
         select.append('<option value="' + wf.id + '">' + wf.name + '</option>')
       })
-      select.val($('.eqLogicAttr[data-l1key=configuration][data-l2key=workflow_id]').val())
+      if (data.result.length === 0) {
+        showManualWorkflowInput()
+      } else {
+        hideManualWorkflowInput()
+        select.val($('.eqLogicAttr[data-l1key=configuration][data-l2key=workflow_id]').val())
+      }
     }
   })
 }

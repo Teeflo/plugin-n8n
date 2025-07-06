@@ -133,6 +133,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                                                 </label>
                                                                 <div class="col-sm-6">
                                                                         <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="workflow_id" id="sel_workflow"></select>
+                                                                        <input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="workflow_id" id="in_workflow_id" placeholder="{{ID du workflow}}" style="display:none;margin-top:5px;"/>
                                                                 </div>
                                                                 <div class="col-sm-2">
                                                                         <a class="btn btn-default" id="bt_refreshWorkflow"><i class="fas fa-sync"></i></a>
