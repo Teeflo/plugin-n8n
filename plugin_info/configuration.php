@@ -37,7 +37,7 @@ if (!isConnect()) {
         <sup><i class="fas fa-question-circle tooltips" title="{{Clé API pour l'accès REST à n8n}}"></i></sup>
       </label>
       <div class="col-md-4">
-        <input class="configKey form-control" data-l1key="n8n_api_key"/>
+        <input class="configKey form-control" data-l1key="n8n_api_key" type="password" data-password="true"/>
       </div>
       <div class="col-md-2">
         <a class="btn btn-default" id="bt_testN8N"><i class="fas fa-check"></i> {{Tester}}</a>

@@ -85,3 +85,229 @@ function addCmdToTable(_cmd) {
     }
   })
 }
+
+function showManualWorkflowInput () {
+  $('#in_workflow_id').show()
+  $('#sel_workflow').hide()
+}
+
+function hideManualWorkflowInput () {
+  $('#in_workflow_id').hide()
+  $('#sel_workflow').show()
+}
+
+function loadWorkflows () {
+  // Afficher un indicateur de chargement
+  $('#bt_refreshWorkflow').html('<i class="fas fa-spinner fa-spin"></i>');
+  
+  $.ajax({
+    type: 'POST',
+    url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
+    data: {action: 'listWorkflows'},
+    dataType: 'json',
+    timeout: 30000, // 30 secondes de timeout
+    error: function (request, status, error) {
+      // Restaurer le bouton
+      $('#bt_refreshWorkflow').html('<i class="fas fa-sync"></i>');
+      
+      var errorMessage = "{{Impossible de récupérer la liste des workflows.}}";
+      
+      if (status === 'timeout') {
+        errorMessage = "{{Délai d'attente dépassé. Vérifiez que votre instance n8n est accessible.}}";
+      } else if (request.status === 401) {
+        errorMessage = "{{Erreur d'authentification. Vérifiez votre clé API.}}";
+      } else if (request.status === 404) {
+        errorMessage = "{{URL de l'instance n8n incorrecte.}}";
+      } else if (request.status >= 500) {
+        errorMessage = "{{Erreur serveur n8n. Vérifiez l'état de votre instance.}}";
+      }
+      
+      $('#div_alert').showAlert({message: errorMessage, level: 'warning'});
+      showManualWorkflowInput();
+      
+      // Log de l'erreur pour debug
+      console.error('Erreur lors du chargement des workflows:', status, error, request.responseText);
+    },
+    success: function (data) {
+      // Restaurer le bouton
+      $('#bt_refreshWorkflow').html('<i class="fas fa-sync"></i>');
+      
+      if (data.state != 'ok') {
+        var errorMessage = data.result || "{{Erreur lors de la récupération des workflows}}";
+        $('#div_alert').showAlert({message: errorMessage, level: 'danger'});
+        showManualWorkflowInput();
+        return;
+      }
+      
+      var select = $('#sel_workflow');
+      select.empty();
+      
+      if (data.result && data.result.length > 0) {
+        $.each(data.result, function (i, wf) {
+          select.append('<option value="' + wf.id + '">' + wf.name + '</option>');
+        });
+        hideManualWorkflowInput();
+        select.val($('.eqLogicAttr[data-l1key=configuration][data-l2key=workflow_id]').val());
+        
+        // Message de succès
+        $('#div_alert').showAlert({message: "{{Liste des workflows récupérée avec succès}}", level: 'success'});
+      } else {
+        $('#div_alert').showAlert({message: "{{Aucun workflow trouvé dans votre instance n8n}}", level: 'info'});
+        showManualWorkflowInput();
+      }
+    }
+  });
+}
+
+$('#bt_refreshWorkflow').on('click', function () {
+  loadWorkflows()
+})
+
+$(document).ready(function () {
+  if ($('#bt_refreshWorkflow').length) {
+    showManualWorkflowInput()
+    loadWorkflows()
+  }
+  
+  // Initialisation du système de gestion des équipements Jeedom
+  $('.eqLogicAction[data-action="add"]').on('click', function () {
+    $.ajax({
+      type: 'POST',
+      url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
+      data: {action: 'add'},
+      dataType: 'json',
+      error: function (request, status, error) {
+        console.error('Erreur AJAX:', request.responseText);
+        $('#div_alert').showAlert({message: '{{Erreur lors de la création}}', level: 'danger'});
+      },
+      success: function (data) {
+        if (data.state != 'ok') {
+          $('#div_alert').showAlert({message: data.result, level: 'danger'});
+          return;
+        }
+        $('.eqLogic').setValues(data.result, '.eqLogicAttr');
+        $('.eqLogicThumbnailDisplay').hide();
+        $('.eqLogic').show();
+        loadCmd();
+      }
+    });
+  });
+  
+  $('.eqLogicAction[data-action="save"]').on('click', function () {
+    var eqLogic = $('.eqLogic').getValues('.eqLogicAttr')[0];
+    
+    // Validation basique
+    if (!eqLogic.name || eqLogic.name.trim() === '') {
+      $('#div_alert').showAlert({message: '{{Le nom de l\'équipement est obligatoire}}', level: 'warning'});
+      return;
+    }
+    
+    $.ajax({
+      type: 'POST',
+      url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
+      data: {
+        action: 'save',
+        eqLogic: json_encode(eqLogic)
+      },
+      dataType: 'json',
+      error: function (request, status, error) {
+        console.error('Erreur AJAX:', request.responseText);
+        $('#div_alert').showAlert({message: '{{Erreur lors de la sauvegarde}}', level: 'danger'});
+      },
+      success: function (data) {
+        if (data.state != 'ok') {
+          $('#div_alert').showAlert({message: data.result, level: 'danger'});
+          return;
+        }
+        $('#div_alert').showAlert({message: '{{Équipement sauvegardé}}', level: 'success'});
+        $('.eqLogic').hide();
+        $('.eqLogicThumbnailDisplay').show();
+        location.reload();
+      }
+    });
+  });
+  
+  $('.eqLogicAction[data-action="remove"]').on('click', function () {
+    if (confirm('{{Êtes-vous sûr de vouloir supprimer cet équipement ?}}')) {
+      var eqLogic = $('.eqLogic').getValues('.eqLogicAttr')[0];
+      $.ajax({
+        type: 'POST',
+        url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
+        data: {
+          action: 'remove',
+          id: eqLogic.id
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+          handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+          if (data.state != 'ok') {
+            $('#div_alert').showAlert({message: data.result, level: 'danger'});
+            return;
+          }
+          $('.eqLogic').hide();
+          $('.eqLogicThumbnailDisplay').show();
+          location.reload();
+        }
+      });
+    }
+  });
+  
+  $('.eqLogicAction[data-action="returnToThumbnailDisplay"]').on('click', function () {
+    $('.eqLogic').hide();
+    $('.eqLogicThumbnailDisplay').show();
+  });
+  
+  $('.eqLogicDisplayCard').on('click', function () {
+    var eqLogic_id = $(this).attr('data-eqLogic_id');
+    $.ajax({
+      type: 'POST',
+      url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
+      data: {
+        action: 'get',
+        id: eqLogic_id
+      },
+      dataType: 'json',
+      error: function (request, status, error) {
+        handleAjaxError(request, status, error);
+      },
+      success: function (data) {
+        if (data.state != 'ok') {
+          $('#div_alert').showAlert({message: data.result, level: 'danger'});
+          return;
+        }
+        $('.eqLogic').setValues(data.result, '.eqLogicAttr');
+        $('.eqLogicThumbnailDisplay').hide();
+        $('.eqLogic').show();
+        loadCmd();
+      }
+    });
+  });
+  
+  function loadCmd() {
+    var eqLogic_id = $('.eqLogicAttr[data-l1key=id]').value();
+    $.ajax({
+      type: 'POST',
+      url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
+      data: {
+        action: 'getCmd',
+        id: eqLogic_id
+      },
+      dataType: 'json',
+      error: function (request, status, error) {
+        handleAjaxError(request, status, error);
+      },
+      success: function (data) {
+        if (data.state != 'ok') {
+          $('#div_alert').showAlert({message: data.result, level: 'danger'});
+          return;
+        }
+        $('#table_cmd tbody').empty();
+        $.each(data.result, function (i, cmd) {
+          addCmdToTable(cmd);
+        });
+      }
+    });
+  }
+})
