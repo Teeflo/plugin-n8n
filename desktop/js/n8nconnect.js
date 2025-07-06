@@ -104,6 +104,7 @@ function loadWorkflows () {
     dataType: 'json',
     error: function (request, status, error) {
       handleAjaxError(request, status, error)
+      $('#div_alert').showAlert({message: "{{Impossible de r\xE9cup\xE9rer la liste des workflows. Saisissez l'ID manuellement.}}", level: 'warning'})
       showManualWorkflowInput()
     },
     success: function (data) {
@@ -133,6 +134,7 @@ $('#bt_refreshWorkflow').on('click', function () {
 
 $(document).ready(function () {
   if ($('#bt_refreshWorkflow').length) {
+    showManualWorkflowInput()
     loadWorkflows()
   }
 })
