@@ -97,6 +97,16 @@ function hideManualWorkflowInput () {
 }
 
 function loadWorkflows () {
+  // Vérifier que la configuration est complète avant de charger les workflows
+  var url = $('.configKey[data-l1key=n8n_url]').val()
+  var key = $('.configKey[data-l1key=n8n_api_key]').val()
+  
+  if (!url || !key) {
+    $('#div_alert').showAlert({message: "{{Veuillez configurer l'URL et la clé API dans les paramètres du plugin avant de charger les workflows}}", level: 'warning'})
+    showManualWorkflowInput()
+    return
+  }
+  
   // Afficher un indicateur de chargement
   $('#bt_refreshWorkflow').html('<i class="fas fa-spinner fa-spin"></i>')
 
@@ -166,7 +176,12 @@ $('#bt_refreshWorkflow').on('click', function () {
 $(document).ready(function () {
   if ($('#bt_refreshWorkflow').length) {
     showManualWorkflowInput()
-    loadWorkflows()
+    // Ne charger les workflows automatiquement que si la configuration est complète
+    var url = $('.configKey[data-l1key=n8n_url]').val()
+    var key = $('.configKey[data-l1key=n8n_api_key]').val()
+    if (url && key) {
+      loadWorkflows()
+    }
   }
 
   // Initialisation du système de gestion des équipements Jeedom
@@ -189,7 +204,8 @@ $(document).ready(function () {
         $('.eqLogicThumbnailDisplay').hide()
         $('.eqLogic').show()
         loadCmd()
-        if ($('#bt_refreshWorkflow').length) {
+        // Ne charger les workflows que si l'équipement a un ID valide
+        if ($('#bt_refreshWorkflow').length && data.result && data.result.id) {
           loadWorkflows()
         }
       }
@@ -290,7 +306,8 @@ $(document).ready(function () {
         $('.eqLogicThumbnailDisplay').hide()
         $('.eqLogic').show()
         loadCmd()
-        if ($('#bt_refreshWorkflow').length) {
+        // Ne charger les workflows que si l'équipement a un ID valide
+        if ($('#bt_refreshWorkflow').length && data.result && data.result.id) {
           loadWorkflows()
         }
       }

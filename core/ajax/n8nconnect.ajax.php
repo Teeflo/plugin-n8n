@@ -144,6 +144,11 @@ try {
             throw new Exception(__('Données d\'équipement invalides', __FILE__));
         }
 
+        // Validation des données obligatoires
+        if (empty($eqLogicData['name'])) {
+            throw new Exception(__('Le nom de l\'équipement est obligatoire', __FILE__));
+        }
+
         // Si l'ID est vide, créer un nouvel équipement
         if (empty($eqLogicData['id'])) {
             log::add('n8nconnect', 'debug', 'Création d\'un nouvel équipement');

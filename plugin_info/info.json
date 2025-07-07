@@ -14,5 +14,5 @@
     "maxDependancyInstallTime" : 0,
     "language": ["fr_FR","en_US"],
     "compatibility": ["miniplus","smart","rpi","docker","diy","mobile","v4","atlas"],
-    "documentation" : "https://github.com/jeedom/plugin-n8n/blob/master/docs/fr_FR/index.md"
+    "documentation" : "https://github.com/jeedom/plugin-n8nconnect/blob/master/docs/fr_FR/index.md"
 }

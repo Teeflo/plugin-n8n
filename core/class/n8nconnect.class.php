@@ -139,6 +139,12 @@ class n8nconnect extends eqLogic {
             return;
         }
         
+        // Vérifier que l'équipement est activé
+        if (!$this->getIsEnable()) {
+            log::add('n8nconnect', 'debug', 'Équipement désactivé, pas de création de commandes');
+            return;
+        }
+        
         // Vérifier la configuration avant de créer les commandes
         $base = config::byKey('n8n_url', 'n8nconnect');
         $key = config::byKey('n8n_api_key', 'n8nconnect');
@@ -162,6 +168,7 @@ class n8nconnect extends eqLogic {
             $cmd->setType($info['type']);
             $cmd->setSubType($info['subType']);
             $cmd->setName($info['name']);
+            // Correction : utiliser des entiers (1 ou 0) au lieu de booléens
             $cmd->setIsVisible(($logical !== 'state') ? 1 : 0);
             $cmd->setIsHistorized(($logical === 'state') ? 1 : 0);
             $cmd->save();
@@ -171,9 +178,17 @@ class n8nconnect extends eqLogic {
 
     public function refreshInfo() {
         $id = $this->getConfiguration('workflow_id');
-        if (!ctype_digit((string) $id)) {
+        if (empty($id) || !ctype_digit((string) $id)) {
+            log::add('n8nconnect', 'debug', 'ID de workflow manquant ou invalide pour l\'équipement ' . $this->getName());
             return;
         }
+        
+        // Vérifier que l'équipement est activé
+        if (!$this->getIsEnable()) {
+            log::add('n8nconnect', 'debug', 'Équipement désactivé, pas de rafraîchissement');
+            return;
+        }
+        
         try {
             $info = self::callN8n('GET', '/workflows/' . $id);
             $active = isset($info['active']) && $info['active'] ? 1 : 0;
@@ -189,7 +204,11 @@ class n8nconnect extends eqLogic {
 
     public static function cron() {
         foreach (self::byType('n8nconnect') as $eq) {
-            $eq->refreshInfo();
+            try {
+                $eq->refreshInfo();
+            } catch (Exception $e) {
+                log::add('n8nconnect', 'error', 'Erreur lors du rafraîchissement de l\'équipement ' . $eq->getName() . ' : ' . $e->getMessage());
+            }
         }
     }
 
@@ -239,6 +258,12 @@ class n8nconnectCmd extends cmd {
                 throw new Exception(__('Commande inconnue', __FILE__));
         }
     }
+}
+
+if (init('action') == 'getConfig') {
+    $url = config::byKey('n8n_url', 'n8nconnect');
+    $key = config::byKey('n8n_api_key', 'n8nconnect');
+    ajax::success(['url' => $url, 'key' => $key]);
 }
 
 ?>
