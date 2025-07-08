@@ -34,7 +34,7 @@ function addCmdToTable(_cmd) {
   }
   var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">' 
   tr += '<td class="hidden-xs">'
-  tr += '<span class="cmdAttr" data-l1key="id"></span>'
+  tr += '<input type="hidden" class="cmdAttr" data-l1key="id">'
   tr += '</td>'
   tr += '<td>'
   tr += '<div class="input-group">'
@@ -81,6 +81,7 @@ function addCmdToTable(_cmd) {
     success: function (result) {
       tr.find('.cmdAttr[data-l1key=value]').append(result)
       tr.setValues(_cmd, '.cmdAttr')
+      tr.find('input[data-l1key="logicalId"]').val(_cmd.logicalId);
       jeedom.cmd.changeType(tr, init(_cmd.subType))
     }
   })
@@ -365,4 +366,32 @@ $(document).ready(function () {
       }
     });
   }
+  // Gestionnaires d'événements pour les boutons de commande (délégation)
+  $(document).on('click', '#table_cmd .cmdAction[data-action=configure]', function () {
+    console.log('Configure button clicked!');
+    var cmd = $(this).closest('.cmd').getValues('.cmdAttr');
+    console.log('Command object for configure:', cmd);
+    console.log('Type of jeedom:', typeof jeedom);
+    console.log('Type of jeedom.cmd:', typeof jeedom.cmd);
+    console.log('jeedom.cmd object:', jeedom.cmd);
+    if (typeof jeedom.cmd !== 'undefined' && typeof jeedom.cmd.configure === 'function') {
+      jeedom.cmd.configure(cmd);
+    } else {
+      console.error('jeedom.cmd.configure is not a function or jeedom.cmd is undefined.');
+    }
+  });
+
+  $(document).on('click', '#table_cmd .cmdAction[data-action=test]', function () {
+    console.log('Test button clicked!');
+    var cmd = $(this).closest('.cmd').getValues('.cmdAttr');
+    console.log('Command object for test:', cmd);
+    console.log('Type of jeedom:', typeof jeedom);
+    console.log('Type of jeedom.cmd:', typeof jeedom.cmd);
+    console.log('jeedom.cmd object:', jeedom.cmd);
+    if (typeof jeedom.cmd !== 'undefined' && typeof jeedom.cmd.test === 'function') {
+      jeedom.cmd.test(cmd);
+    } else {
+      console.error('jeedom.cmd.test is not a function or jeedom.cmd is undefined.');
+    }
+  });
 })

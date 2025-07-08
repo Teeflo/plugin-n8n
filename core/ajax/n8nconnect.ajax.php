@@ -198,6 +198,19 @@ try {
         ajax::success($result);
     }
     
+    if (init('action') == 'executeCmd') {
+        $cmdId = init('id');
+        if (empty($cmdId)) {
+            throw new Exception(__('ID de commande manquant', __FILE__));
+        }
+        $cmd = cmd::byId($cmdId);
+        if (!is_object($cmd)) {
+            throw new Exception(__('Commande introuvable', __FILE__));
+        }
+        $result = $cmd->execute();
+        ajax::success($result);
+    }
+
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
 } catch (Exception $e) {
     ajax::error(displayException($e), $e->getCode());

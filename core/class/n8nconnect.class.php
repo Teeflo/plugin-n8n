@@ -153,7 +153,7 @@ class n8nconnect extends eqLogic {
             $cmd->setType($info['type']);
             $cmd->setSubType($info['subType']);
             $cmd->setName($info['name']);
-            $cmd->setIsVisible(($logical !== 'state') ? 1 : 0);
+            $cmd->setIsVisible(1);
             $cmd->setIsHistorized(($logical === 'state') ? 1 : 0);
             $cmd->save();
         }
@@ -171,16 +171,20 @@ class n8nconnect extends eqLogic {
 
     public function refreshInfo() {
         $id = $this->getConfiguration('workflow_id');
-        if (!ctype_digit((string) $id)) {
+        log::add('n8nconnect', 'debug', 'refreshInfo: Tentative de rafraîchissement pour workflow ID: ' . $id);
+        if (empty($id)) {
+            log::add('n8nconnect', 'debug', 'refreshInfo: ID de workflow vide, annulation.');
             return;
         }
         try {
             $info = self::callN8n('GET', '/workflows/' . $id);
+            log::add('n8nconnect', 'debug', 'refreshInfo: Réponse API n8n pour workflow ID ' . $id . ': ' . json_encode($info));
             $active = isset($info['active']) && $info['active'] ? 1 : 0;
         } catch (Exception $e) {
             $active = 0;
-            log::add('n8nconnect', 'error', 'Erreur lors de la récupération du statut : ' . $e->getMessage());
+            log::add('n8nconnect', 'error', 'refreshInfo: Erreur lors de la récupération du statut pour workflow ID ' . $id . ': ' . $e->getMessage());
         }
+        log::add('n8nconnect', 'debug', 'refreshInfo: Statut final pour workflow ID ' . $id . ': ' . $active);
         $cmd = $this->getCmd(null, 'state');
         if (is_object($cmd)) {
             $cmd->event($active);
