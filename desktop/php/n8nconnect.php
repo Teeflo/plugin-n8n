@@ -21,7 +21,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 			</div>
 			<div class="cursor eqLogicAction logoSecondary" data-action="gotoPluginConf">
 				<i class="fas fa-wrench"></i>
-				<br>
+				<br />
 				<span>{{Configuration}}</span>
 			</div>
 		</div>
@@ -74,6 +74,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 			<li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fas fa-arrow-circle-left"></i></a></li>
 			<li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
 			<li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Commandes}}</a></li>
+			<li role="presentation"><a href="#executionhistorytab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-history"></i> {{Historique des exécutions}}</a></li>
 		</ul>
 		<div class="tab-content">
 			<!-- Onglet de configuration de l'équipement -->
@@ -204,6 +205,26 @@ $eqLogics = eqLogic::byType($plugin->getId());
 				</div>
 			</div><!-- /.tabpanel #commandtab-->
 
+			<!-- Onglet Historique des exécutions -->
+			<div role="tabpanel" class="tab-pane" id="executionhistorytab">
+				<div class="table-responsive">
+					<table id="table_executions" class="table table-bordered table-condensed">
+						<thead>
+							<tr>
+								<th>{{ID}}</th>
+								<th>{{Statut}}</th>
+								<th>{{Début}}</th>
+								<th>{{Fin}}</th>
+								<th>{{Durée (ms)}}</th>
+								<th>{{Mode}}</th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
+			</div><!-- /.tabpanel #executionhistorytab-->
+
 		</div><!-- /.tab-content -->
 	</div><!-- /.eqLogic -->
 </div><!-- /.row row-overflow -->
@@ -212,4 +233,4 @@ $eqLogics = eqLogic::byType($plugin->getId());
 <?php include_file('core', 'cmd', 'js');?>
 <!-- Inclusion du fichier javascript du plugin (dossier, nom_du_fichier, extension_du_fichier, id_du_plugin) -->
 <?php include_file('desktop', 'n8nconnect', 'js', 'n8nconnect');?>
-<?php include_file('core', 'plugin.n8nconnect', 'js');?>
+<?php include_file('core', 'plugin.template', 'js');?>

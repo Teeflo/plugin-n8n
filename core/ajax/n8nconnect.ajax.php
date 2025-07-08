@@ -197,9 +197,27 @@ try {
         }
         ajax::success($result);
     }
+
+    if (init('action') == 'getWorkflowExecutions') {
+        $workflowId = init('workflow_id');
+        if (empty($workflowId)) {
+            throw new Exception(__('ID de workflow manquant', __FILE__));
+        }
+        try {
+            $executions = n8nconnect::getWorkflowExecutions($workflowId);
+            ajax::success($executions);
+        } catch (Exception $e) {
+            log::add('n8nconnect', 'error', 'Erreur lors de la récupération des exécutions de workflow : ' . $e->getMessage());
+            ajax::error($e->getMessage());
+        }
+    }
     
     if (init('action') == 'executeCmd') {
         $cmdId = init('id');
+        $options = init('options', '');
+        if (!empty($options)) {
+            $options = json_decode($options, true);
+        }
         if (empty($cmdId)) {
             throw new Exception(__('ID de commande manquant', __FILE__));
         }
@@ -207,8 +225,23 @@ try {
         if (!is_object($cmd)) {
             throw new Exception(__('Commande introuvable', __FILE__));
         }
-        $result = $cmd->execute();
+        $result = $cmd->execute($options);
         ajax::success($result);
+    }
+
+    if (init('action') == 'receiveErrorNotification') {
+        $payload = file_get_contents('php://input');
+        $data = json_decode($payload, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            log::add('n8nconnect', 'error', 'Notification d\'erreur n8n: Payload JSON invalide.');
+            throw new Exception(__('Payload JSON invalide', __FILE__));
+        }
+
+        log::add('n8nconnect', 'error', 'Notification d\'erreur n8n reçue: ' . json_encode($data));
+        // Ici, vous pouvez ajouter la logique pour traiter la notification
+        // Par exemple, créer un message Jeedom, mettre à jour une commande info, etc.
+        ajax::success(__('Notification reçue', __FILE__));
     }
 
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));

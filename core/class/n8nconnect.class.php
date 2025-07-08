@@ -197,7 +197,7 @@ class n8nconnect extends eqLogic {
         }
     }
 
-    public function launch() {
+    public function launch($parameters = []) {
         $webhook_url = $this->getConfiguration('webhook_url');
         if (empty($webhook_url)) {
             throw new Exception(__('URL de webhook manquante', __FILE__));
@@ -211,6 +211,15 @@ class n8nconnect extends eqLogic {
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+
+        $headers = [];
+        if (!empty($parameters)) {
+            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($parameters));
+            $headers[] = 'Content-Type: application/json';
+        }
+        if (!empty($headers)) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        }
 
         $response = curl_exec($curl);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -247,13 +256,21 @@ class n8nconnect extends eqLogic {
         self::callN8n('POST', '/workflows/' . $id . '/deactivate');
         $this->refreshInfo();
     }
+
+    public static function getWorkflowExecutions($workflowId) {
+        if (empty($workflowId)) {
+            throw new Exception(__('ID de workflow manquant pour récupérer les exécutions', __FILE__));
+        }
+        // Assuming n8n API endpoint for executions is /workflows/{id}/executions
+        return self::callN8n('GET', '/executions?workflowId=' . $workflowId);
+    }
 }
 
 class n8nconnectCmd extends cmd {
     public function execute($_options = array()) {
         switch ($this->getLogicalId()) {
             case 'run':
-                $this->getEqLogic()->launch();
+                $this->getEqLogic()->launch($_options);
                 return;
             case 'activate':
                 $this->getEqLogic()->activate();

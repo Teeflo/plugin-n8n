@@ -34,7 +34,7 @@ function addCmdToTable(_cmd) {
   }
   var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">' 
   tr += '<td class="hidden-xs">'
-  tr += '<input type="hidden" class="cmdAttr" data-l1key="id">'
+  tr += '<input type="hidden" class="cmdAttr" data-l1key="id">' + init(_cmd.id)
   tr += '</td>'
   tr += '<td>'
   tr += '<div class="input-group">'
@@ -55,7 +55,9 @@ function addCmdToTable(_cmd) {
   tr += '<label class="checkbox-inline"><input type="checkbox" class="cmdAttr" data-l1key="isHistorized" checked/>{{Historiser}}</label> '
   tr += '<label class="checkbox-inline"><input type="checkbox" class="cmdAttr" data-l1key="display" data-l2key="invertBinary"/>{{Inverser}}</label> '
   tr += '<div style="margin-top:7px;">'
-  tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="minValue" placeholder="{{Min}}" title="{{Min}}" style="width:30%;max-width:80px;display:inline-block;margin-right:2px;">'
+  tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="webhook_url" placeholder="{{URL du webhook}}" title="{{URL du webhook}}" style="width:100%;">'
+  tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="parameters" placeholder="{{Paramètres (JSON)}}" title="{{Paramètres à envoyer au webhook (JSON)}}" style="width:100%;margin-top:5px;">'
+  tr += '</div>'
   tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="maxValue" placeholder="{{Max}}" title="{{Max}}" style="width:30%;max-width:80px;display:inline-block;margin-right:2px;">'
   tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="unite" placeholder="Unité" title="{{Unité}}" style="width:30%;max-width:80px;display:inline-block;margin-right:2px;">'
   tr += '</div>'
@@ -98,6 +100,7 @@ function hideManualWorkflowInput () {
 }
 
 function loadWorkflows () {
+  console.log('loadWorkflows function called!');
   // Afficher un indicateur de chargement
   $('#bt_refreshWorkflow').html('<i class="fas fa-spinner fa-spin"></i>');
   
@@ -388,10 +391,85 @@ $(document).ready(function () {
     console.log('Type of jeedom:', typeof jeedom);
     console.log('Type of jeedom.cmd:', typeof jeedom.cmd);
     console.log('jeedom.cmd object:', jeedom.cmd);
+
+    var options = {};
+    if (cmd.logicalId === 'run' && cmd.configuration && cmd.configuration.parameters) {
+      try {
+        options = JSON.parse(cmd.configuration.parameters);
+      } catch (e) {
+        $('#div_alert').showAlert({message: '{{Les paramètres doivent être un JSON valide.}}', level: 'danger'});
+        return;
+      }
+    }
+
     if (typeof jeedom.cmd !== 'undefined' && typeof jeedom.cmd.test === 'function') {
-      jeedom.cmd.test(cmd);
+      jeedom.cmd.test(cmd, options);
     } else {
       console.error('jeedom.cmd.test is not a function or jeedom.cmd is undefined.');
     }
+  });
+
+  $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    if (e.target.hash == '#executionhistorytab') {
+      loadWorkflowExecutions();
+    }
+  });
+
+  function loadWorkflowExecutions() {
+    var eqLogic_id = $('.eqLogicAttr[data-l1key=id]').val();
+    var workflow_id = $('.eqLogicAttr[data-l1key=configuration][data-l2key=workflow_id]').val();
+
+    console.log('eqLogic_id:', eqLogic_id);
+    console.log('workflow_id:', workflow_id);
+
+    if (!eqLogic_id || !workflow_id) {
+      $('#div_alert').showAlert({message: "{{Veuillez sauvegarder l'équipement et sélectionner un workflow d'abord.}}", level: 'warning'});
+      return;
+    }
+
+    $('#table_executions tbody').empty().append('<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> {{Chargement...}}</td></tr>');
+
+    $.ajax({
+      type: 'POST',
+      url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
+      data: {
+        action: 'getWorkflowExecutions',
+        workflow_id: workflow_id
+      },
+      dataType: 'json',
+      error: function (request, status, error) {
+        console.error('Erreur AJAX lors du chargement des exécutions:', request.responseText);
+        $('#div_alert').showAlert({message: "{{Erreur lors du chargement de l'historique des exécutions.}}", level: 'danger'});
+        $('#table_executions tbody').empty().append('<tr><td colspan="6" class="text-center">{{Erreur de chargement.}}</td></tr>');
+      },
+      success: function (data) {
+        $('#table_executions tbody').empty();
+        if (data.state != 'ok') {
+          $('#div_alert').showAlert({message: data.result, level: 'danger'});
+          $('#table_executions tbody').append('<tr><td colspan="6" class="text-center">' + data.result + '</td></tr>');
+          return;
+        }
+
+        if (data.result && data.result.data && data.result.data.length > 0) {
+          $.each(data.result.data, function (i, execution) {
+            var row = '<tr>';
+            row += '<td>' + execution.id + '</td>';
+            row += '<td>' + execution.status + '</td>';
+            row += '<td>' + (execution.startedAt ? new Date(execution.startedAt).toLocaleString() : '') + '</td>';
+            row += '<td>' + (execution.stoppedAt ? new Date(execution.stoppedAt).toLocaleString() : '') + '</td>';
+            row += '<td>' + (execution.stoppedAt && execution.startedAt ? (new Date(execution.stoppedAt).getTime() - new Date(execution.startedAt).getTime()) : '') + '</td>';
+            row += '<td>' + execution.mode + '</td>';
+            row += '</tr>';
+            $('#table_executions tbody').append(row);
+          });
+        } else {
+          $('#table_executions tbody').append('<tr><td colspan="6" class="text-center">{{Aucune exécution trouvée pour ce workflow.}}</td></tr>');
+        }
+      }
+    });
+  };
+
+  $('.eqLogicAction[data-action="gotoPluginConf"]').on('click', function () {
+    window.location.href = 'index.php?v=d&p=plugin&id=n8nconnect&plugin=n8nconnect';
   });
 })

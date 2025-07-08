@@ -11,6 +11,7 @@ Ce plugin permet de piloter et de superviser vos workflows **n8n** directement d
     *   **Lancer (via Webhook) :** Déclenchez un workflow n8n en envoyant une requête à son URL de webhook configurée. Cette commande apparaît uniquement si un webhook est renseigné pour l'équipement.
 *   **Commande d'information :**
     *   **État :** Obtenez le statut (actif/inactif) de votre workflow n8n.
+*   **Notifications d'erreur de workflow :** Recevez des notifications dans Jeedom lorsqu'un workflow n8n échoue, permettant une gestion proactive des problèmes.
 *   **Sélection simplifiée :** Choisissez vos workflows n8n via une liste déroulante ou saisissez manuellement leur ID.
 *   **Journalisation détaillée :** Des logs précis pour faciliter le diagnostic en cas de problème.
 
@@ -89,11 +90,35 @@ Pour des informations plus détaillées, consultez les logs du plugin :
 2.  Sélectionnez le plugin **n8nconnect**.
 3.  Recherchez les messages d'erreur récents pour identifier la cause du problème.
 
-## Support
+## Notifications d'erreur n8n vers Jeedom
 
-En cas de problème persistant, veuillez fournir les informations suivantes :
-*   Version de Jeedom.
-*   Version de n8n.
-*   Messages d'erreur exacts (copiés depuis les logs).
-*   Capture d'écran de votre configuration du plugin (masquez votre clé API).
-*   Capture d'écran de la configuration de l'équipement concerné.
+Pour recevoir des notifications d'erreur de vos workflows n8n directement dans Jeedom, vous pouvez configurer un "Workflow d'erreur" global dans n8n qui enverra une requête HTTP à Jeedom.
+
+### Configuration dans n8n
+
+1.  **Créez un nouveau workflow** dans n8n (ou utilisez un workflow existant dédié aux erreurs).
+2.  Ajoutez un nœud **"Webhook"** comme déclencheur. Configurez-le pour écouter les requêtes `POST`.
+3.  Ajoutez un nœud **"HTTP Request"** après le nœud "Webhook".
+    *   **Method :** `POST`
+    *   **URL :** `http://VOTRE_IP_JEEDOM/plugins/n8nconnect/core/ajax/n8nconnect.ajax.php?action=receiveErrorNotification`
+        *   Remplacez `VOTRE_IP_JEEDOM` par l'adresse IP ou le nom de domaine de votre installation Jeedom.
+    *   **Body Content Type :** `JSON`
+    *   **JSON Body :** Vous pouvez envoyer n'importe quelle donnée JSON pertinente. Par exemple, pour envoyer les informations d'erreur du workflow qui a échoué, vous pouvez utiliser une expression comme :
+        ```json
+        {
+          "workflowName": "{{ $json.workflow.name }}",
+          "workflowId": "{{ $json.workflow.id }}",
+          "executionId": "{{ $json.id }}",
+          "error": "{{ $json.error.message }}",
+          "stackTrace": "{{ $json.error.stack }}"
+        }
+        ```
+        Ces variables (`$json.workflow.name`, etc.) sont disponibles dans le contexte d'un workflow d'erreur n8n.
+4.  **Activez ce workflow** dans n8n.
+5.  **Configurez ce workflow comme "Workflow d'erreur" global :**
+    *   Dans n8n, allez dans **Settings > Workflow Error Handling**.
+    *   Sélectionnez le workflow que vous venez de créer dans la liste déroulante "Error Workflow".
+
+### Traitement dans Jeedom
+
+Le plugin n8n Connect recevra ces notifications et les enregistrera dans les logs du plugin (`Outils > Logs > n8nconnect`). Vous pouvez ensuite utiliser les scénarios Jeedom pour analyser ces logs et déclencher des actions (notifications, alertes, etc.) en fonction du contenu des messages d'erreur.

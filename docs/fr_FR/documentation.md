@@ -208,6 +208,39 @@ Pour obtenir des informations plus détaillées sur les erreurs, consultez les l
 2.  Dans la liste déroulante, sélectionnez `n8nconnect`.
 3.  Les logs affichent les communications entre Jeedom et n8n, y compris les requêtes envoyées et les réponses reçues, ce qui est crucial pour le dépannage.
 
+## Notifications d'erreur de workflow
+
+Pour recevoir des notifications d'erreur de vos workflows n8n directement dans Jeedom, vous pouvez configurer un "Workflow d'erreur" global dans n8n qui enverra une requête HTTP à Jeedom.
+
+### Configuration dans n8n
+
+1.  **Créez un nouveau workflow** dans n8n (ou utilisez un workflow existant dédié aux erreurs).
+2.  Ajoutez un nœud **"Webhook"** comme déclencheur. Configurez-le pour écouter les requêtes `POST`.
+3.  Ajoutez un nœud **"HTTP Request"** après le nœud "Webhook".
+    *   **Method :** `POST`
+    *   **URL :** `http://VOTRE_IP_JEEDOM/plugins/n8nconnect/core/ajax/n8nconnect.ajax.php?action=receiveErrorNotification`
+        *   Remplacez `VOTRE_IP_JEEDOM` par l'adresse IP ou le nom de domaine de votre installation Jeedom.
+    *   **Body Content Type :** `JSON`
+    *   **JSON Body :** Vous pouvez envoyer n'importe quelle donnée JSON pertinente. Par exemple, pour envoyer les informations d'erreur du workflow qui a échoué, vous pouvez utiliser une expression comme :
+        ```json
+        {
+          "workflowName": "{{ $json.workflow.name }}",
+          "workflowId": "{{ $json.workflow.id }}",
+          "executionId": "{{ $json.id }}",
+          "error": "{{ $json.error.message }}",
+          "stackTrace": "{{ $json.error.stack }}"
+        }
+        ```
+        Ces variables (`$json.workflow.name`, etc.) sont disponibles dans le contexte d'un workflow d'erreur n8n.
+4.  **Activez ce workflow** dans n8n.
+5.  **Configurez ce workflow comme "Workflow d'erreur" global :**
+    *   Dans n8n, allez dans **Settings > Workflow Error Handling**.
+    *   Sélectionnez le workflow que vous venez de créer dans la liste déroulante "Error Workflow".
+
+### Traitement dans Jeedom
+
+Le plugin n8n Connect recevra ces notifications et les enregistrera dans les logs du plugin (`Outils > Logs > n8nconnect`). Vous pouvez ensuite utiliser les scénarios Jeedom pour analyser ces logs et déclencher des actions (notifications, alertes, etc.) en fonction du contenu des messages d'erreur.
+
 ## 7. Support
 
 Si vous rencontrez des problèmes persistants après avoir suivi ce guide, veuillez collecter les informations suivantes avant de demander de l'aide :
