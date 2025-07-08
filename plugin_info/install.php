@@ -29,6 +29,12 @@ function n8nconnect_install() {
     if (!is_dir($logDir)) {
         mkdir($logDir, 0755, true);
     }
+
+    // Générer la clé API du plugin si nécessaire
+    if (config::byKey('api_key', 'n8nconnect') == '') {
+        $key = bin2hex(random_bytes(16));
+        config::save('api_key', $key, 'n8nconnect');
+    }
     
     log::add('n8nconnect', 'info', 'Installation du plugin n8nconnect terminée');
 }
@@ -44,6 +50,12 @@ function n8nconnect_update() {
     $logDir = dirname(__FILE__) . '/../../../log/n8nconnect';
     if (!is_dir($logDir)) {
         mkdir($logDir, 0755, true);
+    }
+
+    // Générer la clé API si elle n'existe pas (mise à jour depuis ancienne version)
+    if (config::byKey('api_key', 'n8nconnect') == '') {
+        $key = bin2hex(random_bytes(16));
+        config::save('api_key', $key, 'n8nconnect');
     }
     
     log::add('n8nconnect', 'info', 'Mise à jour du plugin n8nconnect terminée');

@@ -126,137 +126,49 @@ class n8nconnect extends eqLogic {
     }
 
     public function postSave() {
-        // Ne créer les commandes que si l'équipement a un ID valide et qu'il n'y a pas déjà de commandes
         if ($this->getId() == '') {
             return;
         }
-        
-        // Vérifier s'il y a déjà des commandes
-        $existingCmds = $this->getCmd();
-        if (count($existingCmds) > 0) {
-            // Les commandes existent déjà, pas besoin de les recréer
-            $this->refreshInfo();
-            return;
-        }
-        
-        // Vérifier que l'équipement est activé
-        if (!$this->getIsEnable()) {
-            log::add('n8nconnect', 'debug', 'Équipement désactivé, pas de création de commandes');
-            return;
-        }
-        
-        // Vérifier la configuration avant de créer les commandes
-        $base = config::byKey('n8n_url', 'n8nconnect');
-        $key = config::byKey('n8n_api_key', 'n8nconnect');
-        
-        if (empty($base) || empty($key)) {
-            log::add('n8nconnect', 'warning', 'Configuration incomplète lors de la sauvegarde de l\'équipement');
-            // Ne pas bloquer la création, juste afficher un avertissement
-            return;
-        }
-        
-        $commands = [
-            'run' => ['name' => __('Lancer', __FILE__), 'type' => 'action', 'subType' => 'other'],
-            'activate' => ['name' => __('Activer', __FILE__), 'type' => 'action', 'subType' => 'other'],
-            'deactivate' => ['name' => __('Désactiver', __FILE__), 'type' => 'action', 'subType' => 'other'],
-            'state' => ['name' => __('État', __FILE__), 'type' => 'info', 'subType' => 'binary']
-        ];
-        foreach ($commands as $logical => $info) {
+
+        $cmd = $this->getCmd(null, 'execute');
+        if (!is_object($cmd)) {
             $cmd = new n8nconnectCmd();
-            $cmd->setLogicalId($logical);
+            $cmd->setLogicalId('execute');
             $cmd->setEqLogic_id($this->getId());
-            $cmd->setType($info['type']);
-            $cmd->setSubType($info['subType']);
-            $cmd->setName($info['name']);
-            // Correction : utiliser des entiers (1 ou 0) au lieu de booléens
-            $cmd->setIsVisible(($logical !== 'state') ? 1 : 0);
-            $cmd->setIsHistorized(($logical === 'state') ? 1 : 0);
+            $cmd->setType('action');
+            $cmd->setSubType('message');
+            $cmd->setName(__('Exécuter le workflow', __FILE__));
+            $cmd->setIsVisible(1);
+            $cmd->setIsHistorized(0);
             $cmd->save();
         }
-        $this->refreshInfo();
     }
 
-    public function refreshInfo() {
+    public function triggerWorkflow($message = '') {
         $id = $this->getConfiguration('workflow_id');
-        if (empty($id) || !ctype_digit((string) $id)) {
-            log::add('n8nconnect', 'debug', 'ID de workflow manquant ou invalide pour l\'équipement ' . $this->getName());
-            return;
-        }
-        
-        // Vérifier que l'équipement est activé
-        if (!$this->getIsEnable()) {
-            log::add('n8nconnect', 'debug', 'Équipement désactivé, pas de rafraîchissement');
-            return;
-        }
-        
-        try {
-            $info = self::callN8n('GET', '/workflows/' . $id);
-            $active = isset($info['active']) && $info['active'] ? 1 : 0;
-        } catch (Exception $e) {
-            $active = 0;
-            log::add('n8nconnect', 'error', 'Erreur lors de la récupération du statut : ' . $e->getMessage());
-        }
-        $cmd = $this->getCmd(null, 'state');
-        if (is_object($cmd)) {
-            $cmd->event($active);
-        }
-    }
-
-    public static function cron() {
-        foreach (self::byType('n8nconnect') as $eq) {
-            try {
-                $eq->refreshInfo();
-            } catch (Exception $e) {
-                log::add('n8nconnect', 'error', 'Erreur lors du rafraîchissement de l\'équipement ' . $eq->getName() . ' : ' . $e->getMessage());
-            }
-        }
-    }
-
-    public function launch() {
-        $id = $this->getConfiguration('workflow_id');
-        if ($id == '') {
-            throw new Exception(__('ID de workflow manquant', __FILE__));
-        }
-        if (!ctype_digit((string) $id)) {
+        if ($id == '' || !ctype_digit((string)$id)) {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
-        return self::callN8n('POST', '/workflows/' . $id . '/run');
-    }
 
-    public function activate() {
-        $id = $this->getConfiguration('workflow_id');
-        if (!ctype_digit((string) $id)) {
-            throw new Exception(__('ID de workflow invalide', __FILE__));
-        }
-        self::callN8n('POST', '/workflows/' . $id . '/activate');
-        $this->refreshInfo();
-    }
+        $payload = [
+            'source' => 'Jeedom',
+            'eqLogic_id' => $this->getId(),
+            'eqLogic_name' => $this->getName(),
+            'trigger_value' => $message,
+        ];
 
-    public function deactivate() {
-        $id = $this->getConfiguration('workflow_id');
-        if (!ctype_digit((string) $id)) {
-            throw new Exception(__('ID de workflow invalide', __FILE__));
-        }
-        self::callN8n('POST', '/workflows/' . $id . '/deactivate');
-        $this->refreshInfo();
+        self::callN8n('POST', '/workflows/' . $id . '/executions', $payload);
     }
 }
 
 class n8nconnectCmd extends cmd {
     public function execute($_options = array()) {
-        switch ($this->getLogicalId()) {
-            case 'run':
-                $this->getEqLogic()->launch();
-                return;
-            case 'activate':
-                $this->getEqLogic()->activate();
-                return;
-            case 'deactivate':
-                $this->getEqLogic()->deactivate();
-                return;
-            default:
-                throw new Exception(__('Commande inconnue', __FILE__));
+        if ($this->getLogicalId() == 'execute') {
+            $msg = isset($_options['message']) ? $_options['message'] : '';
+            $this->getEqLogic()->triggerWorkflow($msg);
+            return;
         }
+        throw new Exception(__('Commande inconnue', __FILE__));
     }
 }
 
