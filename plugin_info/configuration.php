@@ -42,7 +42,18 @@ if (!isConnect()) {
       <div class="col-md-2">
         <a class="btn btn-default" id="bt_testN8N"><i class="fas fa-check"></i> {{Tester}}</a>
       </div>
+  </div>
+  <div class="form-group">
+    <label class="col-md-4 control-label">{{URL API entrante}}
+      <sup><i class="fas fa-question-circle tooltips" title="{{Utilisez cette URL dans vos workflows n8n pour envoyer des données vers Jeedom}}"></i></sup>
+    </label>
+    <div class="col-md-6">
+      <?php
+        $apiUrl = rtrim(network::getNetworkAccess('external'), '/') . '/core/api/jeeApi.php?plugin=n8nconnect&type=api&apikey=' . jeedom::getApiKey('n8nconnect') . '&eqLogic_id=[ID_EQUIPEMENT]&cmd_name=[NOM_COMMANDE]&value=';
+      ?>
+      <input class="form-control" value="<?php echo $apiUrl; ?>" readonly />
     </div>
+  </div>
   </fieldset>
 </form>
 <script>

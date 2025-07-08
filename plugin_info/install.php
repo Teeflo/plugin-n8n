@@ -23,6 +23,9 @@ function n8nconnect_install() {
     if (!function_exists('curl_init')) {
         throw new Exception('L\'extension cURL de PHP est requise pour ce plugin');
     }
+
+    // Génération de la clé API dédiée au plugin
+    jeedom::getApiKey('n8nconnect');
     
     // Créer le dossier de logs s'il n'existe pas
     $logDir = dirname(__FILE__) . '/../../../log/n8nconnect';
@@ -39,6 +42,9 @@ function n8nconnect_update() {
     if (!function_exists('curl_init')) {
         throw new Exception('L\'extension cURL de PHP est requise pour ce plugin');
     }
+
+    // S'assure que la clé API du plugin existe
+    jeedom::getApiKey('n8nconnect');
     
     // Créer le dossier de logs s'il n'existe pas
     $logDir = dirname(__FILE__) . '/../../../log/n8nconnect';

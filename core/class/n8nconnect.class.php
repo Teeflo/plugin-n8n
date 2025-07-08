@@ -155,25 +155,15 @@ class n8nconnect extends eqLogic {
             return;
         }
         
-        $commands = [
-            'run' => ['name' => __('Lancer', __FILE__), 'type' => 'action', 'subType' => 'other'],
-            'activate' => ['name' => __('Activer', __FILE__), 'type' => 'action', 'subType' => 'other'],
-            'deactivate' => ['name' => __('Désactiver', __FILE__), 'type' => 'action', 'subType' => 'other'],
-            'state' => ['name' => __('État', __FILE__), 'type' => 'info', 'subType' => 'binary']
-        ];
-        foreach ($commands as $logical => $info) {
-            $cmd = new n8nconnectCmd();
-            $cmd->setLogicalId($logical);
-            $cmd->setEqLogic_id($this->getId());
-            $cmd->setType($info['type']);
-            $cmd->setSubType($info['subType']);
-            $cmd->setName($info['name']);
-            // Correction : utiliser des entiers (1 ou 0) au lieu de booléens
-            $cmd->setIsVisible(($logical !== 'state') ? 1 : 0);
-            $cmd->setIsHistorized(($logical === 'state') ? 1 : 0);
-            $cmd->save();
-        }
-        $this->refreshInfo();
+        $cmd = new n8nconnectCmd();
+        $cmd->setLogicalId('execute');
+        $cmd->setEqLogic_id($this->getId());
+        $cmd->setType('action');
+        $cmd->setSubType('message');
+        $cmd->setName(__('Exécuter le workflow', __FILE__));
+        $cmd->setIsVisible(1);
+        $cmd->setIsHistorized(0);
+        $cmd->save();
     }
 
     public function refreshInfo() {
@@ -212,6 +202,20 @@ class n8nconnect extends eqLogic {
         }
     }
 
+    public function executeWorkflow($message = '') {
+        $id = $this->getConfiguration('workflow_id');
+        if ($id == '') {
+            throw new Exception(__('ID de workflow manquant', __FILE__));
+        }
+        $payload = [
+            'source' => 'Jeedom',
+            'eqLogic_id' => $this->getId(),
+            'eqLogic_name' => $this->getName(),
+            'trigger_value' => $message,
+        ];
+        self::callN8n('POST', '/workflows/' . $id . '/executions', $payload);
+    }
+
     public function launch() {
         $id = $this->getConfiguration('workflow_id');
         if ($id == '') {
@@ -245,14 +249,9 @@ class n8nconnect extends eqLogic {
 class n8nconnectCmd extends cmd {
     public function execute($_options = array()) {
         switch ($this->getLogicalId()) {
-            case 'run':
-                $this->getEqLogic()->launch();
-                return;
-            case 'activate':
-                $this->getEqLogic()->activate();
-                return;
-            case 'deactivate':
-                $this->getEqLogic()->deactivate();
+            case 'execute':
+                $message = isset($_options['message']) ? $_options['message'] : '';
+                $this->getEqLogic()->executeWorkflow($message);
                 return;
             default:
                 throw new Exception(__('Commande inconnue', __FILE__));

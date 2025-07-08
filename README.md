@@ -1,12 +1,13 @@
 # n8n Connect pour Jeedom
 
-Ce plugin permet de piloter des workflows **n8n** directement depuis Jeedom. Il offre un moyen simple de lancer ou d'activer/désactiver des workflows et de centraliser leur supervision depuis l'interface domotique.
+Ce plugin permet de piloter des workflows **n8n** directement depuis Jeedom. Il découvre vos workflows via l'API n8n et crée automatiquement les commandes nécessaires. Il offre également une URL d'API permettant à n8n de pousser des données vers Jeedom.
 
 ## Fonctionnalités
 
 - Configuration d'une instance n8n (URL et clé API).
 - Création d'équipements représentant chaque workflow à contrôler.
-- Commandes pour lancer, activer ou désactiver un workflow.
+- Commande "Exécuter le workflow" générée automatiquement pour chaque équipement.
+- Possibilité d'ajouter des commandes **Info** pour recevoir des données de n8n.
 
 Ce dépôt est basé sur le template officiel de plugin Jeedom et fournit un point de départ pour développer des interactions avancées entre Jeedom et n8n.
 
@@ -27,6 +28,17 @@ Ce dépôt est basé sur le template officiel de plugin Jeedom et fournit un poi
    - **URL de l'instance n8n** (ex: `https://mon.n8n.local`)
    - **Clé API** (générée dans n8n > Settings > API)
 5. Testez la connexion avec le bouton **"Tester"**
+6. Utilisez l'URL d'API entrante affichée pour envoyer des informations depuis vos workflows n8n.
+
+## Exemple de workflow n8n
+
+Dans n8n, ajoutez un nœud **HTTP Request** configuré en `POST` vers l'URL indiquée dans la configuration du plugin. Renseignez les paramètres `eqLogic_id`, `cmd_name` et `value` pour mettre à jour une commande Info dans Jeedom :
+
+```http
+POST https://votre-jeedom/core/api/jeeApi.php?plugin=n8nconnect&type=api&apikey=XXXX&eqLogic_id=1&cmd_name=Température&value=21
+```
+
+Le workflow peut ainsi renvoyer dynamiquement des données vers Jeedom.
 
 ## Dépannage
 
