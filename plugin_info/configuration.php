@@ -43,6 +43,14 @@ if (!isConnect()) {
         <a class="btn btn-default" id="bt_testN8N"><i class="fas fa-check"></i> {{Tester}}</a>
       </div>
     </div>
+    <div class="form-group">
+      <label class="col-md-4 control-label">{{URL API entrante}}
+        <sup><i class="fas fa-question-circle tooltips" title="{{A utiliser dans vos workflows n8n}}"></i></sup>
+      </label>
+      <div class="col-md-8">
+        <input class="form-control" readonly value="<?php echo network::getNetworkAccess('internal', 'http') . '/core/api/jeeApi.php?plugin=n8nconnect&type=api&apikey=' . jeedom::getApiKey('n8nconnect') . '&eqLogic_id=[ID_EQUIPEMENT]&cmd_name=[NOM_COMMANDE]&value='; ?>"/>
+      </div>
+    </div>
   </fieldset>
 </form>
 <script>
