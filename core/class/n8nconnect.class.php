@@ -59,9 +59,11 @@ class n8nconnect extends eqLogic {
         
         $headers = [
             'Accept: application/json',
-            'Content-Type: application/json',
             'X-N8N-API-KEY: ' . $key,
         ];
+        if ($data !== null) {
+            $headers[] = 'Content-Type: application/json';
+        }
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
@@ -130,35 +132,24 @@ class n8nconnect extends eqLogic {
         if ($this->getId() == '') {
             return;
         }
-        
-        // Vérifier s'il y a déjà des commandes
-        $existingCmds = $this->getCmd();
-        if (count($existingCmds) > 0) {
-            // Les commandes existent déjà, pas besoin de les recréer
-            $this->refreshInfo();
-            return;
-        }
-        
-        // Vérifier la configuration avant de créer les commandes
-        $base = config::byKey('n8n_url', 'n8nconnect');
-        $key = config::byKey('n8n_api_key', 'n8nconnect');
-        
-        if (empty($base) || empty($key)) {
-            log::add('n8nconnect', 'warning', 'Configuration incomplète lors de la sauvegarde de l\'équipement');
-            // Ne pas bloquer la création, juste afficher un avertissement
-            return;
-        }
-        
+
         $commands = [
-            'run' => ['name' => __('Lancer', __FILE__), 'type' => 'action', 'subType' => 'other'],
             'activate' => ['name' => __('Activer', __FILE__), 'type' => 'action', 'subType' => 'other'],
             'deactivate' => ['name' => __('Désactiver', __FILE__), 'type' => 'action', 'subType' => 'other'],
             'state' => ['name' => __('État', __FILE__), 'type' => 'info', 'subType' => 'binary']
         ];
+
+        if ($this->getConfiguration('webhook_url') != '') {
+            $commands['run'] = ['name' => __('Lancer', __FILE__), 'type' => 'action', 'subType' => 'other'];
+        }
+
         foreach ($commands as $logical => $info) {
-            $cmd = new n8nconnectCmd();
-            $cmd->setLogicalId($logical);
-            $cmd->setEqLogic_id($this->getId());
+            $cmd = $this->getCmd(null, $logical);
+            if (!is_object($cmd)) {
+                $cmd = new n8nconnectCmd();
+                $cmd->setLogicalId($logical);
+                $cmd->setEqLogic_id($this->getId());
+            }
             $cmd->setType($info['type']);
             $cmd->setSubType($info['subType']);
             $cmd->setName($info['name']);
@@ -166,6 +157,15 @@ class n8nconnect extends eqLogic {
             $cmd->setIsHistorized(($logical === 'state') ? 1 : 0);
             $cmd->save();
         }
+
+        // Supprimer la commande "Lancer" si le webhook n'est plus configuré
+        if ($this->getConfiguration('webhook_url') == '') {
+            $cmd = $this->getCmd(null, 'run');
+            if (is_object($cmd)) {
+                $cmd->remove();
+            }
+        }
+
         $this->refreshInfo();
     }
 
@@ -194,19 +194,41 @@ class n8nconnect extends eqLogic {
     }
 
     public function launch() {
-        $id = $this->getConfiguration('workflow_id');
-        if ($id == '') {
-            throw new Exception(__('ID de workflow manquant', __FILE__));
+        $webhook_url = $this->getConfiguration('webhook_url');
+        if (empty($webhook_url)) {
+            throw new Exception(__('URL de webhook manquante', __FILE__));
         }
-        if (!ctype_digit((string) $id)) {
-            throw new Exception(__('ID de workflow invalide', __FILE__));
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $webhook_url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+
+        $response = curl_exec($curl);
+        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $error = curl_error($curl);
+        curl_close($curl);
+
+        if ($response === false) {
+            log::add('n8nconnect', 'error', 'Erreur cURL : ' . $error);
+            throw new Exception('Erreur de connexion : ' . $error);
         }
-        return self::callN8n('POST', '/workflows/' . $id . '/run');
+
+        if ($code < 200 || $code >= 300) {
+            log::add('n8nconnect', 'error', 'Erreur webhook : ' . $response);
+            throw new Exception('Erreur webhook : ' . $response);
+        }
+
+        return $response;
     }
 
     public function activate() {
         $id = $this->getConfiguration('workflow_id');
-        if (!ctype_digit((string) $id)) {
+        if (empty($id)) {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
         self::callN8n('POST', '/workflows/' . $id . '/activate');
@@ -215,7 +237,7 @@ class n8nconnect extends eqLogic {
 
     public function deactivate() {
         $id = $this->getConfiguration('workflow_id');
-        if (!ctype_digit((string) $id)) {
+        if (empty($id)) {
             throw new Exception(__('ID de workflow invalide', __FILE__));
         }
         self::callN8n('POST', '/workflows/' . $id . '/deactivate');

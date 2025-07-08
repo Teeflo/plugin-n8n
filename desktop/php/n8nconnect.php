@@ -132,13 +132,22 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                                                         <sup><i class="fas fa-question-circle tooltips" title="{{Sélection du workflow n8n}}"></i></sup>
                                                                 </label>
                                                                 <div class="col-sm-6">
-                                                                        <select class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="workflow_id" id="sel_workflow"></select>
-                                                                        <input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="workflow_id" id="in_workflow_id" placeholder="{{ID du workflow}}" style="display:none;margin-top:5px;"/>
+                                                                        <input type="hidden" class="eqLogicAttr" data-l1key="configuration" data-l2key="workflow_id" />
+                                                                        <select class="form-control" id="sel_workflow_ui"></select>
+                                                                        <input class="form-control" id="in_workflow_id_ui" placeholder="{{ID du workflow}}" style="display:none;margin-top:5px;"/>
                                                                 </div>
                                                                 <div class="col-sm-2">
                                                                         <a class="btn btn-default" id="bt_refreshWorkflow"><i class="fas fa-sync"></i></a>
                                                                 </div>
                                                         </div>
+							<div class="form-group">
+								<label class="col-sm-4 control-label">{{Webhook URL}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{URL du webhook pour lancer le workflow}}"></i></sup>
+								</label>
+								<div class="col-sm-6">
+									<input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="webhook_url" placeholder="https://n8n.example.com/webhook/...">
+								</div>
+							</div>
 							<!-- Exemple de champ de saisie du cron d'auto-actualisation avec assistant -->
 							<!-- La fonction cron de la classe du plugin doit contenir le code prévu pour que ce champ soit fonctionnel -->
 							<div class="form-group">

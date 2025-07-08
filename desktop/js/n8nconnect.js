@@ -32,7 +32,7 @@ function addCmdToTable(_cmd) {
   if (!isset(_cmd.configuration)) {
     _cmd.configuration = {}
   }
-  var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">'
+  var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">' 
   tr += '<td class="hidden-xs">'
   tr += '<span class="cmdAttr" data-l1key="id"></span>'
   tr += '</td>'
@@ -87,13 +87,13 @@ function addCmdToTable(_cmd) {
 }
 
 function showManualWorkflowInput () {
-  $('#in_workflow_id').show()
-  $('#sel_workflow').hide()
+  $('#in_workflow_id_ui').show()
+  $('#sel_workflow_ui').hide()
 }
 
 function hideManualWorkflowInput () {
-  $('#in_workflow_id').hide()
-  $('#sel_workflow').show()
+  $('#in_workflow_id_ui').hide()
+  $('#sel_workflow_ui').show()
 }
 
 function loadWorkflows () {
@@ -139,7 +139,7 @@ function loadWorkflows () {
         return;
       }
       
-      var select = $('#sel_workflow');
+      var select = $('#sel_workflow_ui');
       select.empty();
       
       if (data.result && data.result.length > 0) {
@@ -170,6 +170,14 @@ function loadWorkflows () {
 
 $('#bt_refreshWorkflow').on('click', function () {
   loadWorkflows()
+})
+
+$(document).on('change', '#sel_workflow_ui', function () {
+  $('.eqLogicAttr[data-l1key=configuration][data-l2key=workflow_id]').val($(this).val())
+})
+
+$(document).on('input', '#in_workflow_id_ui', function () {
+  $('.eqLogicAttr[data-l1key=configuration][data-l2key=workflow_id]').val($(this).val())
 })
 
 $(document).ready(function () {
@@ -225,7 +233,7 @@ $(document).ready(function () {
       url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
       data: {
         action: 'save',
-        eqLogic: json_encode(eqLogic)
+        eqLogic: JSON.stringify(eqLogic)
       },
       dataType: 'json',
       error: function (request, status, error) {
@@ -330,7 +338,7 @@ $(document).ready(function () {
   });
   
   function loadCmd() {
-    var eqLogic_id = $('.eqLogicAttr[data-l1key=id]').value();
+    var eqLogic_id = $('.eqLogicAttr[data-l1key=id]').val();
     if (!eqLogic_id) return;
     
     $.ajax({
