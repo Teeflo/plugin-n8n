@@ -14,7 +14,7 @@
     "documentation": "https://github.com/Teeflo/plugin-n8n/blob/beta/docs/fr_FR/documentation.md",
     
     "licence" : "AGPL",
-    "author" : "Jeedom Community",
+    "author" : "Teeflo",
     "require" : "4.2.0",
     "category" : "communication",
     "hasDependency" : false,
