@@ -188,7 +188,7 @@ $(document).ready(function () {
   // Initialisation des workflows si on est sur la page d'équipement
   if ($('#bt_refreshWorkflow').length) {
     showManualWorkflowInput()
-    loadWorkflows()
+
   }
   
   // Initialisation du système de gestion des équipements Jeedom
@@ -241,7 +241,7 @@ $(document).ready(function () {
           
           // Recharger les workflows pour s'assurer que la sélection est correcte
           if ($('#bt_refreshWorkflow').length) {
-            loadWorkflows();
+        ;
           }
         }
       }
@@ -314,9 +314,6 @@ $(document).ready(function () {
         $('.eqLogic').show();
         loadCmd();
         // Recharger les workflows quand on ouvre un équipement
-        if ($('#bt_refreshWorkflow').length) {
-          loadWorkflows();
-        }
       }
     });
   });
