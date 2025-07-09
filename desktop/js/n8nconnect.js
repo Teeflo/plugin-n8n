@@ -192,36 +192,7 @@ $(document).ready(function () {
   }
   
   // Initialisation du système de gestion des équipements Jeedom
-  $('.eqLogicAction[data-action="add"]').on('click', function () {
-    $.ajax({
-      type: 'POST',
-      url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
-      data: {action: 'add'},
-      dataType: 'json',
-      error: function (request, status, error) {
-        console.error('Erreur AJAX:', request.responseText);
-        $('#div_alert').showAlert({message: '{{Erreur lors de la création}}', level: 'danger'});
-      },
-      success: function (data) {
-        if (data.state != 'ok') {
-          $('#div_alert').showAlert({message: data.result, level: 'danger'});
-          return;
-        }
-        $('.eqLogic').setValues(data.result, '.eqLogicAttr');
-        // Explicitly set the ID for new equipment
-        if (data.result && data.result.id) {
-            $('.eqLogicAttr[data-l1key=id]').val(data.result.id);
-        }
-        $('.eqLogicThumbnailDisplay').hide();
-        $('.eqLogic').show();
-        loadCmd();
-        // Recharger les workflows quand on crée un nouvel équipement
-        if ($('#bt_refreshWorkflow').length) {
-          loadWorkflows();
-        }
-      }
-    });
-  });
+  
   
   $('.eqLogicAction[data-action="save"]').on('click', function () {
     var eqLogic = $('.eqLogic').getValues('.eqLogicAttr')[0];
