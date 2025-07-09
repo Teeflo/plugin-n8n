@@ -33,7 +33,8 @@
         "Chargement...": "Laden...",
         "Erreur lors du chargement de l'historique des exécutions.": "Fehler beim Laden des Ausführungsverlaufs.",
         "Erreur de chargement.": "Ladefehler.",
-        "Aucune exécution trouvée pour ce workflow.": "Keine Ausführungen für diesen Workflow gefunden."
+        "Aucune exécution trouvée pour ce workflow.": "Keine Ausführungen für diesen Workflow gefunden.",
+        "Paramètres à envoyer au webhook (JSON)": "An Webhook zu sendende Parameter (JSON)"
     },
     "plugins/n8nconnect/core/ajax/n8nconnect.ajax.php": {
         "401 - Accès non autorisé": "401 - Unautorisierter Zugriff",
@@ -131,7 +132,7 @@
         "Désactiver": "Deaktivieren",
         "URL de webhook manquante": "Webhook-URL fehlt",
         "ID de workflow invalide": "Ungültige Workflow-ID",
-        "ID de workflow manquant pour récupérer les exécutions": "Workflow-ID fehlt, um Ausführungen abzurufen",
+        "ID de workflow manquant pour récupérer les exécutions": "Workflow-ID fehlt, um Ausführungen abzurouter",
         "Commande inconnue": "Unbekannter Befehl"
     }
 }

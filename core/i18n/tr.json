@@ -33,7 +33,8 @@
         "Chargement...": "Yükleniyor...",
         "Erreur lors du chargement de l'historique des exécutions.": "Yürütme geçmişi yüklenirken hata oluştu.",
         "Erreur de chargement.": "Yükleme hatası.",
-        "Aucune exécution trouvée pour ce workflow.": "Bu iş akışı için yürütme bulunamadı."
+        "Aucune exécution trouvée pour ce workflow.": "Bu iş akışı için yürütme bulunamadı.",
+        "Paramètres à envoyer au webhook (JSON)": "Webhook'e gönderilecek parametreler (JSON)"
     },
     "plugins/n8nconnect/core/ajax/n8nconnect.ajax.php": {
         "401 - Accès non autorisé": "401 - Yetkisiz erişim",

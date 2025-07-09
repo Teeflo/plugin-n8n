@@ -18,7 +18,7 @@
         "URL de l'instance n8n incorrecte.": "URL dell'istanza n8n non corretta.",
         "Erreur serveur n8n. Vérifiez l'état de votre instance.": "Errore del server n8n. Controlla lo stato della tua istanza.",
         "Erreur lors de la récupération des workflows": "Errore durante il recupero dei workflow",
-        "Liste des workflows récupérée avec succès": "Elenco workflow recuperato con successo",
+        "Liste des workflows récupérée avec successo": "Elenco workflow recuperato con successo",
         "Aucun workflow trouvé dans votre instance n8n": "Nessun workflow trovato nella tua istanza n8n",
         "Le nom de l'équipement est obligatoire": "Il nome dell'equipaggiamento è obbligatorio",
         "Erreur lors de la sauvegarde": "Errore durante il salvataggio",
@@ -33,7 +33,8 @@
         "Chargement...": "Caricamento...",
         "Erreur lors du chargement de l'historique des exécutions.": "Errore durante il caricamento della cronologia delle esecuzioni.",
         "Erreur de chargement.": "Errore di caricamento.",
-        "Aucune exécution trouvée pour ce workflow.": "Nessuna esecuzione trovata per questo workflow."
+        "Aucune exécution trouvée pour ce workflow.": "Nessuna esecuzione trovata per questo workflow.",
+        "Paramètres à envoyer au webhook (JSON)": "Parametri da inviare al webhook (JSON)"
     },
     "plugins/n8nconnect/core/ajax/n8nconnect.ajax.php": {
         "401 - Accès non autorisé": "401 - Accesso non autorizzato",
@@ -131,7 +132,7 @@
         "Désactiver": "Disattiva",
         "URL de webhook manquante": "URL webhook mancante",
         "ID de workflow invalide": "ID workflow non valido",
-        "ID de workflow manquant pour récupérer les exécutions": "ID workflow mancante per recuperare le esecuzioni",
+        "ID de workflow manquant pour récupérer les exécutions": "ID workflow mancante per recuperare le exécutions",
         "Commande inconnue": "Comando sconosciuto"
     }
 }
