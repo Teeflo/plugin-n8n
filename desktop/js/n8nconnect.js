@@ -111,8 +111,6 @@ function loadWorkflows () {
     dataType: 'json',
     timeout: 30000, // 30 secondes de timeout
     error: function (request, status, error) {
-      // Restaurer le bouton
-      $('#bt_refreshWorkflow').html('<i class="fas fa-sync"></i>');
       
       var errorMessage = "{{Impossible de récupérer la liste des workflows.}}";
       
@@ -133,8 +131,6 @@ function loadWorkflows () {
       console.error('Erreur lors du chargement des workflows:', status, error, request.responseText);
     },
     success: function (data) {
-      // Restaurer le bouton
-      $('#bt_refreshWorkflow').html('<i class="fas fa-sync"></i>');
       
       if (data.state != 'ok') {
         var errorMessage = data.result || "{{Erreur lors de la récupération des workflows}}";
@@ -168,6 +164,10 @@ function loadWorkflows () {
         $('#div_alert').showAlert({message: "{{Aucun workflow trouvé dans votre instance n8n}}", level: 'info'});
         showManualWorkflowInput();
       }
+    },
+    complete: function() {
+      // Restaurer le bouton dans tous les cas (succès, erreur, timeout)
+      $('#bt_refreshWorkflow').html('<i class="fas fa-sync"></i>');
     }
   });
 }
@@ -208,6 +208,10 @@ $(document).ready(function () {
           return;
         }
         $('.eqLogic').setValues(data.result, '.eqLogicAttr');
+        // Explicitly set the ID for new equipment
+        if (data.result && data.result.id) {
+            $('.eqLogicAttr[data-l1key=id]').val(data.result.id);
+        }
         $('.eqLogicThumbnailDisplay').hide();
         $('.eqLogic').show();
         loadCmd();
@@ -366,6 +370,10 @@ $(document).ready(function () {
         $.each(data.result, function (i, cmd) {
           addCmdToTable(cmd);
         });
+      },
+      complete: function() {
+        // Any loading indicators for loadCmd can be removed here if they exist
+        // For now, just ensuring robustness.
       }
     });
   }
