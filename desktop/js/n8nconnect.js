@@ -138,6 +138,7 @@ function loadWorkflows () {
         showManualWorkflowInput();
         return;
       }
+      console.log('Workflows received:', data.result);
       
       var select = $('#sel_workflow_ui');
       select.empty();
@@ -173,7 +174,7 @@ function loadWorkflows () {
 }
 
 $('#bt_refreshWorkflow').on('click', function () {
-  
+  loadWorkflows();
 })
 
 $(document).on('change', '#sel_workflow_ui', function () {
@@ -187,8 +188,7 @@ $(document).on('input', '#in_workflow_id_ui', function () {
 $(document).ready(function () {
   // Initialisation des workflows si on est sur la page d'équipement
   if ($('#bt_refreshWorkflow').length) {
-    showManualWorkflowInput()
-
+    showManualWorkflowInput();
   }
   
   // Initialisation du système de gestion des équipements Jeedom
@@ -241,7 +241,7 @@ $(document).ready(function () {
           
           // Recharger les workflows pour s'assurer que la sélection est correcte
           if ($('#bt_refreshWorkflow').length) {
-        ;
+            loadWorkflows();
           }
         }
       }
@@ -314,6 +314,9 @@ $(document).ready(function () {
         $('.eqLogic').show();
         loadCmd();
         // Recharger les workflows quand on ouvre un équipement
+        if ($('#bt_refreshWorkflow').length) {
+          loadWorkflows();
+        }
       }
     });
   });

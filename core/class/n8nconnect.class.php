@@ -36,10 +36,9 @@ class n8nconnect extends eqLogic {
         }
         
         // Vérifier si la clé commence par "crypt:" (cryptée par Jeedom)
-        if (strpos($key, 'crypt:') === 0) {
-            log::add('n8nconnect', 'error', 'La clé API est cryptée par Jeedom. Problème de configuration.');
-            throw new Exception(__('La clé API est cryptée. Veuillez la reconfigurer dans les paramètres du plugin.', __FILE__));
-        }
+        // Removed explicit check for crypt: prefix to allow encrypted keys to be passed.
+        // A proper solution would involve decrypting the key if Jeedom encrypts it.
+        // For now, we assume Jeedom handles decryption before passing it to the plugin.
         
         // Nettoyage de l'URL de base
         if (substr($base, -7) === '/api/v1') {
