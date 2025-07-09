@@ -2,7 +2,37 @@
     "id" : "n8nconnect",
     "name" : "n8n Connect",
     "description" : {
-        "fr_FR" : "Plugin pour piloter des workflows n8n depuis Jeedom"
+        "fr_FR" : "Plugin pour piloter et superviser vos workflows n8n directement depuis Jeedom. Il permet de lancer, activer/désactiver et vérifier l'état de vos workflows.",
+        "en_US" : "Plugin to control and monitor your n8n workflows directly from your Jeedom home automation interface. It allows you to launch, activate/deactivate, and check the status of your workflows.",
+        "de_DE" : "Dieses Plugin ermöglicht es Ihnen, Ihre n8n-Workflows direkt über Ihre Jeedom-Hausautomatisierungsoberfläche zu steuern und zu überwachen. Es erlaubt Ihnen, Workflows zu starten, zu aktivieren/deaktivieren und ihren Status zu überprüfen.",
+        "es_ES" : "Este plugin le permite controlar y supervisar sus flujos de trabajo de n8n directamente desde su interfaz de domótica Jeedom. Permite lanzar, activar/desactivar y verificar el estado de sus flujos de trabajo.",
+        "ru_RU" : "Этот плагин позволяет вам управлять и отслеживать ваши рабочие процессы n8n непосредственно из интерфейса домашней автоматизации Jeedom. Он позволяет запускать, активировать/деактивировать и проверять статус ваших рабочих процессов.",
+        "id_ID" : "Plugin ini memungkinkan Anda untuk mengontrol dan memantau alur kerja n8n Anda langsung dari antarmuka otomatisasi rumah Jeedom Anda. Ini memungkinkan Anda untuk meluncurkan, mengaktifkan/menonaktifkan, dan memeriksa status alur kerja Anda.",
+        "it_IT" : "Questo plugin ti permette de contrôler et de surveiller vos workflows n8n directement depuis votre interface domotique Jeedom."
+    },
+    "changelog" : {
+        "fr_FR" : "docs/fr_FR/changelog.md",
+        "en_US" : "docs/en_US/changelog.md",
+        "de_DE" : "docs/de_DE/changelog.md",
+        "es_ES" : "docs/es_ES/changelog.md",
+        "ru_RU" : "docs/ru_RU/changelog.md",
+        "id_ID" : "docs/id_ID/changelog.md",
+        "it_IT" : "docs/it_IT/changelog.md",
+        "pt_PT" : "docs/pt_PT/changelog.md",
+        "ja_JP" : "docs/ja_JP/changelog.md",
+        "tr" : "docs/tr/changelog.md"
+    },
+    "documentation" : {
+        "fr_FR" : "docs/fr_FR/documentation.md",
+        "en_US" : "docs/en_US/documentation.md",
+        "de_DE" : "docs/de_DE/documentation.md",
+        "es_ES" : "docs/es_ES/documentation.md",
+        "ru_RU" : "docs/ru_RU/documentation.md",
+        "id_ID" : "docs/id_ID/documentation.md",
+        "it_IT" : "docs/it_IT/documentation.md",
+        "pt_PT" : "docs/pt_PT/documentation.md",
+        "ja_JP" : "docs/ja_JP/documentation.md",
+        "tr" : "docs/tr/documentation.md"
     },
     "licence" : "AGPL",
     "author" : "Jeedom Community",
