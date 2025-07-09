@@ -8,10 +8,10 @@
         "es_ES" : "Este plugin le permite controlar y supervisar sus flujos de trabajo de n8n directamente desde su interfaz de domótica Jeedom. Permite lanzar, activar/desactivar y verificar el estado de sus flujos de trabajo.",
         "ru_RU" : "Этот плагин позволяет вам управлять и отслеживать ваши рабочие процессы n8n непосредственно из интерфейса домашней автоматизации Jeedom. Он позволяет запускать, активировать/деактивировать и проверять статус ваших рабочих процессов.",
         "id_ID" : "Plugin ini memungkinkan Anda untuk mengontrol dan memantau alur kerja n8n Anda langsung dari antarmuka otomatisasi rumah Jeedom Anda. Ini memungkinkan Anda untuk meluncurkan, mengaktifkan/menonaktifkan, dan memeriksa status alur kerja Anda.",
-        "it_IT" : "Questo plugin ti permette de contrôler et de surveiller vos workflows n8n directement depuis votre interface domotique Jeedom."
+        "it_IT" : "Questo plugin ti permette di controllare e monitorare i tuoi workflow n8n direttamente dalla tua interfaccia domotica Jeedom. Offre un'integrazione semplice ed efficace per lanciare i workflow, attivarli/disattivarli, e verificare il loro stato."
     },
     "changelog": "https://github.com/Teeflo/plugin-n8n/blob/beta/docs/fr_FR/changelog.md",
-    "documentation": "https://github.com/Teeflo/plugin-n8n/blob/beta/docs/fr_FR/documentation.md",,
+    "documentation": "https://github.com/Teeflo/plugin-n8n/blob/beta/docs/fr_FR/documentation.md",
     
     "licence" : "AGPL",
     "author" : "Jeedom Community",
