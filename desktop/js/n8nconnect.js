@@ -310,9 +310,7 @@ $(document).ready(function () {
     $('.eqLogicThumbnailDisplay').show();
   });
   
-  $('.eqLogicAction[data-action="gotoPluginConf"]').on('click', function () {
-    window.location.href = 'index.php?v=d&p=plugin&id=n8nconnect&plugin=n8nconnect';
-  });
+
   
   $('.eqLogicDisplayCard').on('click', function () {
     var eqLogic_id = $(this).attr('data-eqLogic_id');
@@ -477,7 +475,5 @@ $(document).ready(function () {
     });
   };
 
-  $('.eqLogicAction[data-action="gotoPluginConf"]').on('click', function () {
-    window.location.href = 'index.php?v=d&p=plugin&id=n8nconnect&plugin=n8nconnect';
-  });
+
 })

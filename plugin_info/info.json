@@ -9,6 +9,7 @@
     "require" : "4.2.0",
     "category" : "communication",
     "hasDependency" : false,
+    "hasConfiguration": true,
     "hasOwnDeamon" : false,
     "maxDependancyInstallTime" : 0,
     "language": ["fr_FR","en_US"],
