@@ -10,30 +10,9 @@
         "id_ID" : "Plugin ini memungkinkan Anda untuk mengontrol dan memantau alur kerja n8n Anda langsung dari antarmuka otomatisasi rumah Jeedom Anda. Ini memungkinkan Anda untuk meluncurkan, mengaktifkan/menonaktifkan, dan memeriksa status alur kerja Anda.",
         "it_IT" : "Questo plugin ti permette de contrôler et de surveiller vos workflows n8n directement depuis votre interface domotique Jeedom."
     },
-    "changelog" : {
-        "fr_FR" : "docs/fr_FR/changelog.md",
-        "en_US" : "docs/en_US/changelog.md",
-        "de_DE" : "docs/de_DE/changelog.md",
-        "es_ES" : "docs/es_ES/changelog.md",
-        "ru_RU" : "docs/ru_RU/changelog.md",
-        "id_ID" : "docs/id_ID/changelog.md",
-        "it_IT" : "docs/it_IT/changelog.md",
-        "pt_PT" : "docs/pt_PT/changelog.md",
-        "ja_JP" : "docs/ja_JP/changelog.md",
-        "tr" : "docs/tr/changelog.md"
-    },
-    "documentation" : {
-        "fr_FR" : "docs/fr_FR/documentation.md",
-        "en_US" : "docs/en_US/documentation.md",
-        "de_DE" : "docs/de_DE/documentation.md",
-        "es_ES" : "docs/es_ES/documentation.md",
-        "ru_RU" : "docs/ru_RU/documentation.md",
-        "id_ID" : "docs/id_ID/documentation.md",
-        "it_IT" : "docs/it_IT/documentation.md",
-        "pt_PT" : "docs/pt_PT/documentation.md",
-        "ja_JP" : "docs/ja_JP/documentation.md",
-        "tr" : "docs/tr/documentation.md"
-    },
+    "changelog": "docs/fr_FR/changelog.md",
+    "documentation": "docs/fr_FR/documentation.md",,
+    
     "licence" : "AGPL",
     "author" : "Jeedom Community",
     "require" : "4.2.0",
