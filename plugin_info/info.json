@@ -12,6 +12,6 @@
     "hasConfiguration": true,
     "hasOwnDeamon" : false,
     "maxDependancyInstallTime" : 0,
-    "language": ["fr_FR","en_US"],
+    "language": ["fr_FR","en_US","de_DE","es_ES","ru_RU","id_ID","it_IT","pt_PT","ja_JP","tr"],
     "compatibility": ["miniplus","smart","rpi","docker","diy","mobile","v4","atlas"]
 }

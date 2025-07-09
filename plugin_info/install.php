@@ -21,7 +21,7 @@ require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 function n8nconnect_install() {
     // Vérifier que cURL est disponible
     if (!function_exists('curl_init')) {
-        throw new Exception('L\'extension cURL de PHP est requise pour ce plugin');
+        throw new Exception(__('L\'extension cURL de PHP est requise pour ce plugin', __FILE__));
     }
     
     // Créer le dossier de logs s'il n'existe pas
@@ -37,7 +37,7 @@ function n8nconnect_install() {
 function n8nconnect_update() {
     // Vérifier que cURL est disponible
     if (!function_exists('curl_init')) {
-        throw new Exception('L\'extension cURL de PHP est requise pour ce plugin');
+        throw new Exception(__('L\'extension cURL de PHP est requise pour ce plugin', __FILE__));
     }
     
     // Créer le dossier de logs s'il n'existe pas
@@ -51,5 +51,5 @@ function n8nconnect_update() {
 
 // Fonction exécutée automatiquement après la suppression du plugin
 function n8nconnect_remove() {
-    log::add('n8nconnect', 'info', 'Suppression du plugin n8nconnect');
+    log::add('n8nconnect', 'info', __('Suppression du plugin n8nconnect', __FILE__));
 }

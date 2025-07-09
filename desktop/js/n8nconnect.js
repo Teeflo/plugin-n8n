@@ -173,7 +173,7 @@ function loadWorkflows () {
 }
 
 $('#bt_refreshWorkflow').on('click', function () {
-  loadWorkflows()
+  
 })
 
 $(document).on('change', '#sel_workflow_ui', function () {
