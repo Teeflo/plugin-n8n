@@ -168,11 +168,15 @@ try {
     }
     
     if (init('action') == 'remove') {
-        $eqLogic = n8nconnect::byId(init('id'));
+        $id = init('id');
+        log::add('n8nconnect', 'debug', 'Received request to remove equipment with ID: ' . $id);
+        $eqLogic = n8nconnect::byId($id);
         if (!is_object($eqLogic)) {
+            log::add('n8nconnect', 'error', 'Equipment with ID ' . $id . ' not found for removal.');
             throw new Exception(__('Équipement introuvable', __FILE__));
         }
         $eqLogic->remove();
+        log::add('n8nconnect', 'info', 'Equipment with ID ' . $id . ' successfully removed.');
         ajax::success();
     }
     

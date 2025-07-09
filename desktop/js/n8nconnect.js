@@ -250,13 +250,20 @@ $(document).ready(function () {
   
   $('.eqLogicAction[data-action="remove"]').on('click', function () {
     if (confirm('{{Êtes-vous sûr de vouloir supprimer cet équipement ?}}')) {
-      var eqLogic = $('.eqLogic').getValues('.eqLogicAttr')[0];
+      var eqLogicId = $('.eqLogicAttr[data-l1key=id]').val();
+      console.log('Attempting to delete equipment with ID:', eqLogicId);
+
+      if (!eqLogicId) {
+        $('#div_alert').showAlert({message: '{{Impossible de supprimer un équipement non sauvegardé.}}', level: 'warning'});
+        return;
+      }
+
       $.ajax({
         type: 'POST',
         url: 'plugins/n8nconnect/core/ajax/n8nconnect.ajax.php',
         data: {
           action: 'remove',
-          id: eqLogic.id
+          id: eqLogicId
         },
         dataType: 'json',
         error: function (request, status, error) {
@@ -270,7 +277,7 @@ $(document).ready(function () {
           }
           $('.eqLogic').hide();
           $('.eqLogicThumbnailDisplay').show();
-          location.reload(); // Recharger seulement après suppression
+          window.location.href = 'index.php?v=d&m=n8nconnect&p=n8nconnect';
         }
       });
     }
